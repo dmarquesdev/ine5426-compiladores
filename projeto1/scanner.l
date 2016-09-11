@@ -26,6 +26,7 @@ type (int)
 \(                  {return T_OPEN_PAR;}
 \)                  {return T_CLOSE_PAR;}
 \=					{return T_ATTRIB;}
+\,					{return T_COMMA;}
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 
 %%

@@ -20,7 +20,7 @@ extern void yyerror(const char* s, ...);
 %token <ival> T_INT T_VAR_NAME
 
 %token T_PLUS T_TIMES T_SUB T_DIV T_NL T_OPEN_PAR 
-T_CLOSE_PAR T_ATTRIB T_TYPE 
+T_CLOSE_PAR T_ATTRIB T_TYPE T_COMMA
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
@@ -59,8 +59,9 @@ line:
     ;
 
 varDecl:
-    T_VAR_NAME T_ATTRIB
-    | T_VAR_NAME { $$ = 0; } 
+    T_VAR_NAME T_ATTRIB expr { $1 = $3 }
+    | T_VAR_NAME { $1 = 0; } 
+    | varDecl T_COMMA varDecl 
     ;
 
 expr: 
