@@ -4,6 +4,7 @@
 extern int yylex();
 extern void yyerror(const char* s, ...);
 
+
 %}
 
 %define parse.trace
@@ -13,11 +14,14 @@ extern void yyerror(const char* s, ...);
  */
 %union {
     int ival;
+    char* cval;
 }
 
 /* token defines our terminal symbols (tokens).
  */
-%token <ival> T_INT T_VAR_NAME
+%token <ival> T_INT
+
+%token <cval> T_VAR_NAME
 
 %token T_PLUS T_TIMES T_SUB T_DIV T_NL T_OPEN_PAR 
 T_CLOSE_PAR T_ATTRIB T_TYPE T_COMMA
@@ -43,37 +47,37 @@ varDecl
 
 %%
 
-program: /*use ctrl+d to stop*/
-    lines /*$$ = $1 when nothing is said*/
+program: 
+    lines 
     ;
 
 lines: 
-    line /*$$ = $1 when nothing is said*/
+    line 
     | lines line
     ;
 
 line: 
-    T_NL { $$ = 0 /*NULL*/; } /*nothing here to be used */
+    T_NL 
     | varDecl T_NL 
     | expr T_NL 
     ;
 
 varDecl:
-    T_VAR_NAME T_ATTRIB expr { $1 = $3 }
-    | T_VAR_NAME { $1 = 0; } 
+    T_VAR_NAME T_ATTRIB expr 
+    | T_VAR_NAME 
     | varDecl T_COMMA varDecl 
     ;
 
 expr: 
-    T_INT { $$ = $1; } 
-    | T_VAR_NAME { $$ = $1; }
-    | T_SUB T_INT { $$ = -$2; } 
-    | T_SUB T_VAR_NAME { $$ = -$2; }
-    | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
-    | expr T_PLUS expr { $$ = $1 + $3; }
-    | expr T_TIMES expr { $$ = $1 * $3; }
-    | expr T_DIV expr { $$ = $1 / $3; }
-    | expr T_SUB expr { $$ = $1 - $3; }
+    T_INT 
+    | T_VAR_NAME 
+    | T_SUB T_INT  
+    | T_SUB T_VAR_NAME 
+    | T_OPEN_PAR expr T_CLOSE_PAR 
+    | expr T_PLUS expr 
+    | expr T_TIMES expr 
+    | expr T_DIV expr 
+    | expr T_SUB expr 
     ;
 
 %%

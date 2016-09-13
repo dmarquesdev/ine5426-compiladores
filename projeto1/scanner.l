@@ -16,7 +16,6 @@ type (int)
 
 [ \t]               ; //ignores spaces
 {integer}           {yylval.ival = std::atoi(yytext); return T_INT;}
-{var_name}			{return T_VAR_NAME;}
 {type}				{return T_TYPE;}
 \+                 	{return T_PLUS;}
 \*                  {return T_TIMES;}
@@ -27,6 +26,7 @@ type (int)
 \)                  {return T_CLOSE_PAR;}
 \=					{return T_ATTRIB;}
 \,					{return T_COMMA;}
+{var_name}			{yylval.cval = yytext; return T_VAR_NAME;}
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 
 %%
