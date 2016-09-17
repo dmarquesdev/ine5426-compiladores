@@ -30,7 +30,7 @@ namespace SymTbl
 	public:
 		SymbolTable() {}
 		SymbolList symbolList;
-		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* next, SyntaxTree::Node* value);
+		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* next, bool initialized);
 		SyntaxTree::Node* useVariable(std::string id);
 		SyntaxTree::Node* assignVariable(std::string id);
 		bool contains(std::string id) {return symbolList.find(id) != symbolList.end(); }

@@ -78,10 +78,12 @@ line:
     ;
 
 varDecl:
-    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, NULL); } /* Adds variable id to Symbol Table */
-    | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($1, NULL, $3); }
-    | varDecl T_COMMA T_VAR_NAME { $$ = symbolTable.newVariable($3, $1, NULL); }
-    | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($3, $1, $5); }
+    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, false); } /* Adds variable id to Symbol Table */
+    | T_VAR_NAME T_ATTRIB expr { SyntaxTree::Node* node = symbolTable.newVariable($1, NULL, true);
+            $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $3); }
+    | varDecl T_COMMA T_VAR_NAME { $$ = symbolTable.newVariable($3, $1, false); }
+    | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { SyntaxTree::Node* node = symbolTable.newVariable($3, $1, true);
+            $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $5); }
     ;
 
 expr: 

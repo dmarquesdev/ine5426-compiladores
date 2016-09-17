@@ -15,14 +15,15 @@ void Variable::printTree() {
 }
 
 void BinaryOp::printTree() {
-	_left->printTree();
 	switch(_op) {
-		case plus: std::cout << " + "; break;
-		case minus: std::cout << " - "; break;
-		case times: std::cout << " * "; break;
-		case division: std::cout << " / "; break;
-		case assign: std::cout << " = "; break;
+		case plus: std::cout << "+ "; break;
+		case minus: std::cout << "- "; break;
+		case times: std::cout << "* "; break;
+		case division: std::cout << "/ "; break;
+		case assign: std::cout << "= "; break;
 	}
+	_left->printTree();
+	std::cout << " ";
 	_right->printTree();
 }
 
@@ -38,8 +39,11 @@ void Integer::printTree() {
 }
 
 void UnaryOp::printTree() {
+	std::cout << "u";
 	switch(_op) {
-		case negation: std::cout << " - ";
+		case negation: std::cout << "-";
 	}
+	std::cout << " ";
+	
 	_node->printTree();
 }
