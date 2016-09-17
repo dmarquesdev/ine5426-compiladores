@@ -1,3 +1,4 @@
+# Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/Makefile
 # My Little Makefile
 FLEX=flex
 BISON=bison

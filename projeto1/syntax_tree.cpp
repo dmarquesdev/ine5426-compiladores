@@ -1,4 +1,5 @@
 /* Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/ast.cpp */
+
 #include "syntax_tree.h"
 #include "symbol_table.h"
 
@@ -12,6 +13,10 @@ void Variable::printTree() {
 		std::cout << ", ";
 	}
 	std::cout << _id;
+	if(_value != NULL) {
+		std::cout << " = ";
+		_value->printTree();
+	}
 }
 
 void BinaryOp::printTree() {
@@ -44,6 +49,6 @@ void UnaryOp::printTree() {
 		case negation: std::cout << "-";
 	}
 	std::cout << " ";
-	
+
 	_node->printTree();
 }

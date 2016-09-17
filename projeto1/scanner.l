@@ -1,3 +1,5 @@
+/* Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/scanner.l */
+
 %{
 #include <string>
 #include "syntax_tree.h"

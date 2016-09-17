@@ -1,3 +1,5 @@
+/* Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/main.cpp */
+
 #include <iostream>
 #include "syntax_tree.h"
 #include "symbol_table.h"

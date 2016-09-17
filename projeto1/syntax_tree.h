@@ -25,8 +25,9 @@ namespace SyntaxTree
 	public:
 		std::string _id;
 		Node* _next;
-		Variable(std::string id, Node* next) : 
-			_id(id), _next(next) {}
+		Node* _value;
+		Variable(std::string id, Node* value, Node* next) : 
+			_id(id), _value(value), _next(next) {}
 		void printTree();
 	};
 
@@ -62,15 +63,5 @@ namespace SyntaxTree
 			_node(node), _op(op) {}
 		void printTree();
 	};
-
-	/*
-	class Definition : public Node {
-	public:
-		SymTbl::Symbol _symbol;
-		std::string _id;
-		Definition(std::string id, SymTbl::Symbol symbol) :
-			_id(id), _symbol(symbol){}
-		void printTree();
-	}
-	*/
+	
 }
