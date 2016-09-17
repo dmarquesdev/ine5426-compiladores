@@ -2,18 +2,22 @@
 FLEX=flex
 BISON=bison
 CC=clang++
-PARAM=-std=c++11 -fcxx-exceptions -Wno-deprecated-register -Wall
-OUTPUT=myparse
+PARAM=-std=c++11 -fcxx-exceptions -Wno-deprecated-register
+OUTPUT=lukecompiler
 
-$(OUTPUT): parser.h scanner.cpp main.cpp
-	${CC} -o ${OUTPUT} *.cpp ${PARAM}
+all: flex yacc clang
 
-scanner.cpp: scanner.l parser.h
-	${FLEX} -o scanner.cpp scanner.l 
+clang: *.cpp *.h
+	${CC} -o ${OUTPUT} *.cpp ${LLVMPARAM} ${PARAM}
 
-parser.h: parser.y
+yacc: parser.y
 	${BISON} --defines=parser.h --output=parser.cpp parser.y
+
+flex: scanner.l
+	${FLEX} -o scanner.cpp scanner.l 
 
 clean:
 	rm parser.cpp parser.h scanner.cpp ${OUTPUT}
 
+test: all
+	./${OUTPUT} < 1.in
