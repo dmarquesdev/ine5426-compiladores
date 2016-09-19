@@ -63,5 +63,17 @@ namespace SyntaxTree
 			_node(node), _op(op) {}
 		void printTree();
 	};
+
+	class Declaration : public Node {
+	public:
+		std::string _id;
+		//SymTbl::Type _type;
+		//SymTbl::Kind _kind;
+		//Declaration(std::string id, SymTbl::Type type, SymTbl::Kind kind) :
+		//	_id(id), _type(type), _kind(kind) {}
+		Declaration(std::string id) : _id(id) {}
+
+		void printTree();
+	};
 	
 }

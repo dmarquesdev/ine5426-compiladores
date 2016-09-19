@@ -78,10 +78,10 @@ line:
     ;
 
 varDecl:
-    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, NULL); } /* Adds variable id to Symbol Table */
+    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, NULL); $$ = new SyntaxTree::Declaration($1);} /* Adds variable id to Symbol Table */
     | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($1, NULL, $3); }
     | varDecl T_COMMA T_VAR_NAME { $$ = symbolTable.newVariable($3, $1, NULL); }
-    | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($3, $1, $5); }
+    | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($3, $1, $5);}
     ;
 
 expr: 
