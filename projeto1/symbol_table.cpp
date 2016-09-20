@@ -19,7 +19,7 @@ SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* nex
 
 SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
 	if(!contains(id)) { yyerror("Variable not defined yet! %s\n", id.c_str()); }
-	if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
+	// if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
 
 	return new SyntaxTree::Variable(id, NULL, NULL);
 }

@@ -49,6 +49,7 @@ T_CLOSE_PAR T_ATTRIB T_COMMA
 
  %left T_PLUS T_SUB
  %left T_TIMES T_DIV
+ %left USUB
 
 /* Starting rule 
  */
@@ -87,10 +88,7 @@ varDecl:
 expr: 
     T_INT { $$ = new SyntaxTree::Integer($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
-    | T_SUB T_INT  { SyntaxTree::Node* node = new SyntaxTree::Integer($2); 
-            $$ = new SyntaxTree::UnaryOp(node, SyntaxTree::negation); }
-    | T_SUB T_VAR_NAME { SyntaxTree::Node* node = symbolTable.useVariable($2); 
-            $$ = new SyntaxTree::UnaryOp(node, SyntaxTree::negation); }
+    | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); } 
     | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
     | expr T_PLUS expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::plus, $3); }
     | expr T_TIMES expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::times, $3); }
