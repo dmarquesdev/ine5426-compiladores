@@ -72,13 +72,13 @@ lines:
 line: 
     T_NL { $$ = NULL; } /*nothing here to be used */
     | expr T_NL /*$$ = $1 when nothing is said*/
-    | T_TYPE varDecl T_NL { $$ = $2; } /* Variable declaration */
+    | T_TYPE varDecl T_NL { $$ = new SyntaxTree::Declaration($2); } /* Variable declaration */
     | T_VAR_NAME T_ATTRIB expr T_NL { SyntaxTree::Node* node = symbolTable.assignVariable($1);
             $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $3); }/*$$ = $1 when nothing is said*/
     ;
 
 varDecl:
-    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, NULL); $$ = new SyntaxTree::Declaration($1);} /* Adds variable id to Symbol Table */
+    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL, NULL); } /* Adds variable id to Symbol Table */
     | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($1, NULL, $3); }
     | varDecl T_COMMA T_VAR_NAME { $$ = symbolTable.newVariable($3, $1, NULL); }
     | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($3, $1, $5);}

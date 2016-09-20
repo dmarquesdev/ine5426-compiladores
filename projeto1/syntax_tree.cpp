@@ -54,13 +54,6 @@ void UnaryOp::printTree() {
 }
 
 void Declaration::printTree() {
-	/*switch(_type) {
-		case SymTbl::integer: std::cout << "int ";
-	}
-	switch(_kind) {
-		case SymTbl::variable: std::cout << "var: ";
-	}*/
 	std::cout << "int var: ";
-	std::cout << _id;
-	
+	_node->printTree();
 }
