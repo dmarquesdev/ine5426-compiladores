@@ -10,8 +10,7 @@ SyntaxTree::Block* programRoot;
 
 extern int yylex();
 extern void yyerror(const char* s, ...);
-
-
+extern void error(const char* type, const char* s, ...);
 %}
 
 %define parse.trace
@@ -97,5 +96,3 @@ expr:
     ;
 
 %%
-
-

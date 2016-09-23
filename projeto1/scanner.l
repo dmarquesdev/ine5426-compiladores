@@ -7,6 +7,7 @@
 
 extern int yylineno;
 void yyerror(const char* s, ...);
+void error(const char* type, const char* s, ...);
 %}
 
 %option noyywrap nodefault yylineno
@@ -29,13 +30,22 @@ var_name [a-zA-Z]([a-zA-Z0-9_])*
 \=					{return T_ATTRIB;}
 \,					{return T_COMMA;}
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
-.                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
+.                   {error("lexical", "unknown symbol %c\n", *yytext);} /*complains about every unknown character*/
 
 %%
 
 void yyerror(const char *s, ...){
     va_list ap;
     va_start(ap, s);
-    std::fprintf(stderr, "Line %d: error: ", yylineno);
+    std::fprintf(stderr, "[Line %d]: ", yylineno);
     std::vfprintf(stderr, s, ap);
+}
+
+void error(const char* type, const char *s, ...){
+	va_list ap;
+    va_start(ap, s);
+
+	std::string formatted;
+	formatted = type + std::string(" error: ") + s;
+	yyerror(formatted.c_str(), ap);
 }

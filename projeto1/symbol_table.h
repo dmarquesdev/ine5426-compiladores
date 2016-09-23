@@ -1,10 +1,15 @@
 /* Inspirated by https://github.com/llpilla/compiler_examples/blob/master/simple_ast/st.h */
+
+/* 
+ * Symbol Table model, to use in compilers parser
+ */
+
 #pragma once
 
 #include <map>
 #include "syntax_tree.h"
 
-extern void yyerror(const char* msg, ...);
+extern void error(const char* type, const char* msg, ...);
 
 namespace SymTbl
 {

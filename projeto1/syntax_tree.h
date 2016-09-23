@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 
-extern void yyerror(const char*, ...);
+extern void error(const char* type, const char* msg, ...);
 
 namespace SyntaxTree
 {
