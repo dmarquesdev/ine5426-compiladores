@@ -22,6 +22,8 @@ extern void yyerror(const char* s, ...);
 %union {
     int ival;
     const char* cval;
+    float fval;
+    bool bval;
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
 }
@@ -29,17 +31,21 @@ extern void yyerror(const char* s, ...);
 /* token defines our terminal symbols (tokens).
  */
 %token T_TYPE T_PLUS T_TIMES T_SUB T_DIV T_NL T_OPEN_PAR 
-T_CLOSE_PAR T_ATTRIB T_COMMA 
+T_CLOSE_PAR T_ATTRIB T_COMMA T_NEGATION T_BOOL_REL T_BOOL_BIN
 
 %token <ival> T_INT
 
 %token <cval> T_VAR_NAME 
 
+%token <fval> T_FLOAT
+
+%token <bval> T_BOOL
+
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
- %type <node> expr varDecl line
+%type <node> expr boolExpr aritmExpr varDecl line
 %type <block> program lines
 
 /* Operator precedence for mathematical operators
@@ -85,15 +91,27 @@ varDecl:
     | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($3, $1, $5);}
     ;
 
-expr: 
+expr:
+    T_VAR_NAME { $$ = symbolTable.useVariable($1); }
+    | aritmExpr 
+    | boolExpr
+    ;
+
+aritmExpr: 
     T_INT { $$ = new SyntaxTree::Integer($1); }
-    | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
     | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); } 
     | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
     | expr T_PLUS expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::plus, $3); }
     | expr T_TIMES expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::times, $3); }
     | expr T_DIV expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::division, $3); }
     | expr T_SUB expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::minus, $3); }
+    ;
+
+boolExpr:
+    T_BOOL 
+    | T_NEGATION expr
+    | expr T_BOOL_REL expr
+    | expr T_BOOL_BIN expr
     ;
 
 %%

@@ -12,13 +12,24 @@ void yyerror(const char* s, ...);
 %option noyywrap nodefault yylineno
 
 integer [0-9]+
+float {integer}\.{integer}*
+boolean (true|false)
+
+boolean_op_rel (==|!=|>|<|>=|<=)
+boolean_op_bin (&&|\|\|)
+
 var_name [a-zA-Z]([a-zA-Z0-9_])*
+type (int|float|bool)
 
 %%
 
 [ \t]               ; //ignores spaces
+{float}				{yyval.fval = std::atof(yytext); return T_FLOAT;}
 {integer}           {yylval.ival = std::atoi(yytext); return T_INT;}
-"int"				{return T_TYPE;}
+{boolean}			{yylval.bval = std::atol(yytext); return T_BOOL;}
+{type}				{return T_TYPE;}
+{boolean_op_rel}	{return T_BOOL_REL;}
+{boolean_op_bin}	{return T_BOOL_BIN;}
 \+                 	{return T_PLUS;}
 \*                  {return T_TIMES;}
 \-                  {return T_SUB;}
@@ -28,6 +39,7 @@ var_name [a-zA-Z]([a-zA-Z0-9_])*
 \)                  {return T_CLOSE_PAR;}
 \=					{return T_ATTRIB;}
 \,					{return T_COMMA;}
+\!					{return T_NEGATION;}
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 
