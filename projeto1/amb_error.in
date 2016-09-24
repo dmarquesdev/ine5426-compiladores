@@ -1,0 +1,2 @@
+bool ab, ac = true
+ab = ac | ! true
