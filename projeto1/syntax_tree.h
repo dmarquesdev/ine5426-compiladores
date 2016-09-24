@@ -1,15 +1,23 @@
 /* Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/ast.h */
-#pragma once
+#ifndef DRD_SYNTAX_TREE_H
+#define DRD_SYNTAX_TREE_H
 
 #include <iostream>
 #include <vector>
 
 extern void yyerror(const char*, ...);
 
+namespace SymTbl {
+	class Symbol;
+}
+
 namespace SyntaxTree
 {
-	enum Operation { plus, minus, times, division, assign };
-	enum UniOperation { negation };
+	enum Operation { plus, minus, times, division, assign, 
+		greater, greater_equal, equals, less, less_equal, 
+		different, bool_and, bool_or };
+
+	enum UniOperation { negative, negation };
 
 	class Node;
 
@@ -21,13 +29,26 @@ namespace SyntaxTree
 		virtual void printTree(){}
 	};
 
-	class Variable : public Node {
+	class Variable;
+
+	class Declarable : public Node {
+		friend class Variable;
+		
 	public:
 		std::string _id;
-		Node* _next;
+		SymTbl::Symbol* _symbol;
+		virtual void printTree() {}
+	private:
+		Declarable(std::string id, SymTbl::Symbol* symbol) : 
+			_id(id), _symbol(symbol) {}
+	};
+
+	class Variable : public Declarable {
+	public:
+		Declarable* _next;
 		Node* _value;
-		Variable(std::string id, Node* value, Node* next) : 
-			_id(id), _value(value), _next(next) {}
+		Variable(std::string id, SymTbl::Symbol* symbol, Node* value, Declarable* next) : 
+			Declarable(id, symbol), _value(value), _next(next) {}
 		void printTree();
 	};
 
@@ -55,6 +76,20 @@ namespace SyntaxTree
 		void printTree();
 	};
 
+	class Float : public Node {
+	public:
+		float _value;
+		Float(float value) : _value(value) {}
+		void printTree();
+	};
+
+	class Bool : public Node {
+	public:
+		bool _value;
+		Bool(bool value) : _value(value) {}
+		void printTree();
+	};	
+
 	class UnaryOp : public Node {
 	public:
 		Node* _node;
@@ -66,10 +101,10 @@ namespace SyntaxTree
 
 	class Declaration : public Node {
 	public:
-		Node* _node;
-		Declaration(Node* node) : _node(node) {}
-
+		Declarable* _node;
+		Declaration(Declarable* node) : _node(node) {}
 		void printTree();
 	};
 	
 }
+#endif

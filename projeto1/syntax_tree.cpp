@@ -26,7 +26,16 @@ void BinaryOp::printTree() {
 		case times: std::cout << "* "; break;
 		case division: std::cout << "/ "; break;
 		case assign: std::cout << "= "; break;
+		case equals: std::cout << "== "; break;
+		case different: std::cout << "!= "; break;
+		case greater: std::cout << "> "; break;
+		case less: std::cout << "< "; break;
+		case greater_equal: std::cout << ">= "; break;
+		case less_equal: std::cout << "<= "; break;
+		case bool_and: std::cout << "& "; break;
+		case bool_or: std::cout << "| "; break;
 	}
+
 	_left->printTree();
 	std::cout << " ";
 	_right->printTree();
@@ -43,17 +52,28 @@ void Integer::printTree() {
 	std::cout << _value;
 }
 
+void Float::printTree() {
+	std::cout << _value;
+}
+
+void Bool::printTree() {
+	std::cout << ((_value) ? "true" : "false");
+}
+
 void UnaryOp::printTree() {
 	switch(_op) {
-		case negation: std::cout << "-";
+		case negative: std::cout << "-u "; break;
+		case negation: std::cout << "! "; break;
 	}
-	std::cout << "u";
-	std::cout << " ";
-
 	_node->printTree();
 }
 
 void Declaration::printTree() {
-	std::cout << "int var: ";
+	switch(_node->_symbol->_type) {
+		case SymTbl::Type::t_int: std::cout << "int "; break;
+		case SymTbl::Type::t_float: std::cout << "float "; break;
+		case SymTbl::Type::t_bool: std::cout << "bool "; break;
+	}
+	std::cout << "var: ";
 	_node->printTree();
 }

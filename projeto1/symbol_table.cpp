@@ -6,27 +6,26 @@ using namespace SymTbl;
 
 extern SymbolTable symbolTable;
 
-SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* next, SyntaxTree::Node* value) {
+SyntaxTree::Declarable* SymbolTable::newVariable(std::string id, Symbol* symbol, SyntaxTree::Declarable* next, SyntaxTree::Node* value) {
 	if (!contains(id)) {
-		Symbol newSymbol(integer, variable, (value != NULL));
-		symbolList[id] = newSymbol;
+		symbolList[id] = *symbol;
 	} else {
 		yyerror("Variable redefinition! %s\n", id.c_str());
 	}
 
-	return new SyntaxTree::Variable(id, value, next);
+	return new SyntaxTree::Variable(id, symbol, value, next);
 }
 
-SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
+SyntaxTree::Declarable* SymbolTable::useVariable(std::string id) {
 	if(!contains(id)) { yyerror("Variable not defined yet! %s\n", id.c_str()); }
 	// if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
 
-	return new SyntaxTree::Variable(id, NULL, NULL);
+	return new SyntaxTree::Variable(id, NULL, NULL, NULL);
 }
 
-SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
+SyntaxTree::Declarable* SymbolTable::assignVariable(std::string id) {
 	if(!contains(id)) { yyerror("Variable not defined yet! %s\n", id.c_str()); }
 	symbolList[id]._initialized = true;
 
-	return new SyntaxTree::Variable(id, NULL, NULL);
+	return new SyntaxTree::Variable(id, NULL, NULL, NULL);
 }
