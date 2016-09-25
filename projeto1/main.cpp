@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
     //yydebug = 1;              //remove comment to have verbose debug messages
     yyparse();                  //parses whole input
-    std::cout << "============ This is Łukasiewicz Compiler! ===========\n" << std::endl;
+    //std::cout << "============ This is Łukasiewicz Compiler! ===========\n" << std::endl;
     programRoot->printTree();
     return 0;
 }
