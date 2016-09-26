@@ -18,7 +18,7 @@ flex: scanner.l
 	${FLEX} -o scanner.cpp scanner.l 
 
 clean:
-	rm parser.cpp parser.h scanner.cpp ${OUTPUT}
+	rm parser.cpp parser.h scanner.cpp ${OUTPUT} parser.output
 
 test: all
 	./${OUTPUT} < amb_error.in

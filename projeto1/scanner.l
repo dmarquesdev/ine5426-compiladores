@@ -46,7 +46,7 @@ type (int|float|bool)
 ">="				{return T_BOOL_GE;}
 "<="				{return T_BOOL_LE;}
 \&					{return T_BOOL_AND;}
-\|					{return T_BOOL_OR;}
+"|"					{return T_BOOL_OR;}
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
 .                   {yyerror("Unknown token! %c\n", *yytext);} /*complains about every unknown character*/
 

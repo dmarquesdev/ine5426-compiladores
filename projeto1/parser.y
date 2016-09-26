@@ -1,5 +1,9 @@
 /* Inspired on https://github.com/llpilla/compiler_examples/blob/master/simple_ast/parser.y */
 
+/* Expression ambiguity removal inspired on 
+ * https://courses.engr.illinois.edu/cs421/sp2010/lectures/lecture10.pdf
+ */
+
 %{
 #include <iostream>
 #include "symbol_table.h"
@@ -33,6 +37,7 @@ extern void yyerror(const char* s, ...);
     SyntaxTree::Block* block;
     SyntaxTree::Declarable* decl;
     SymTbl::Type type;
+    SyntaxTree::Operation op;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -56,7 +61,9 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
-%type <node> expr boolExpr aritmExpr line attr
+%type <node> expr boolExpr line attr
+aritmExpr aritmTerm aritmValue
+%type <op> mult_op add_op
 %type <block> program lines
 %type <decl> varDecl
 
@@ -128,17 +135,38 @@ expr:
     | boolExpr 
     ;
 
+/* The arithmetic expression grammar uses "stratified grammar" to
+ * avoid ambiguity
+ * https://courses.engr.illinois.edu/cs421/sp2010/lectures/lecture10.pdf
+ * Page 9
+ */
 aritmExpr: 
+    aritmExpr add_op aritmTerm { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | aritmTerm
+    ;
+
+aritmTerm:
+    aritmTerm mult_op aritmValue { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | aritmValue
+    ;
+
+aritmValue:
     T_INT { $$ = new SyntaxTree::Integer($1); }
     | T_FLOAT { $$ = new SyntaxTree::Float($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
     | T_OPEN_PAR aritmExpr T_CLOSE_PAR { $$ = $2; }
-    | T_SUB aritmExpr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
-    | aritmExpr T_PLUS aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::plus, $3); }
-    | aritmExpr T_TIMES aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::times, $3); }
-    | aritmExpr T_DIV aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::division, $3); }
-    | aritmExpr T_SUB aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::minus, $3); }
+    | T_SUB aritmValue %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
     ;
+
+mult_op:
+    T_TIMES { $$ = SyntaxTree::times; }
+    | T_DIV { $$ = SyntaxTree::division; }
+
+add_op:
+    T_PLUS { $$ = SyntaxTree::plus; }
+    | T_SUB { $$ = SyntaxTree::minus; }
+
+/* End of Arithmetic expression */ 
 
 boolExpr:
     T_BOOL { $$ = new SyntaxTree::Bool($1); }
