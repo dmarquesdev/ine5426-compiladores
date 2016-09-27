@@ -160,9 +160,9 @@ exprTerm4:
     ;
 
 exprValue:
-    T_INT { $$ = new SyntaxTree::Integer($1); }
-    | T_FLOAT { $$ = new SyntaxTree::Float($1); }
-    | T_BOOL { $$ = new SyntaxTree::Bool($1); }
+    T_INT { $$ = new SyntaxTree::Node(SymTbl::Type::t_int); }
+    | T_FLOAT { $$ = new SyntaxTree::Node(SymTbl::Type::t_float); }
+    | T_BOOL { $$ = new SyntaxTree::Node(SymTbl::Type::t_bool); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
     | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
     | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 

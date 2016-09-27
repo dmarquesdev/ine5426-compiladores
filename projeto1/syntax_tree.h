@@ -9,6 +9,7 @@ extern void yyerror(const char*, ...);
 
 namespace SymTbl {
 	class Symbol;
+	enum class Type;
 }
 
 namespace SyntaxTree
@@ -23,8 +24,13 @@ namespace SyntaxTree
 
 	typedef std::vector<Node*> NodeList;
 
+	typedef SymTbl::Type Type;
+
 	class Node {
 	public:
+		Type _type;
+		Node() {}
+		Node(Type type) : _type(type) {}
 		virtual ~Node(){}
 		virtual void printTree(){}
 	};
@@ -39,16 +45,14 @@ namespace SyntaxTree
 		SymTbl::Symbol* _symbol;
 		virtual void printTree() {}
 	private:
-		Declarable(std::string id, SymTbl::Symbol* symbol) : 
-			_id(id), _symbol(symbol) {}
+		Declarable(std::string id, SymTbl::Symbol* symbol);
 	};
 
 	class Variable : public Declarable {
 	public:
 		Declarable* _next;
 		Node* _value;
-		Variable(std::string id, SymTbl::Symbol* symbol, Node* value, Declarable* next) : 
-			Declarable(id, symbol), _value(value), _next(next) {}
+		Variable(std::string id, SymTbl::Symbol* symbol, Node* value, Declarable* next);
 		void printTree();
 	};
 
@@ -67,44 +71,22 @@ namespace SyntaxTree
 	class Block : public Node {
 	public:
 		NodeList _lines;
-		Block(){}
+		Block() {}
 		void printTree();
 	};
-
-	class Integer : public Node {
-	public:
-		int _value;
-		Integer(int value) : _value(value) {}
-		void printTree();
-	};
-
-	class Float : public Node {
-	public:
-		float _value;
-		Float(float value) : _value(value) {}
-		void printTree();
-	};
-
-	class Bool : public Node {
-	public:
-		bool _value;
-		Bool(bool value) : _value(value) {}
-		void printTree();
-	};	
 
 	class UnaryOp : public Node {
 	public:
 		Node* _node;
 		UniOperation _op;
-		UnaryOp(Node* node, UniOperation op) : 
-			_node(node), _op(op) {}
+		UnaryOp(Node* node, UniOperation op);
 		void printTree();
 	};
 
 	class Declaration : public Node {
 	public:
 		Declarable* _node;
-		Declaration(Declarable* node) : _node(node) {}
+		Declaration(Declarable* node);
 		void printTree();
 	};
 	

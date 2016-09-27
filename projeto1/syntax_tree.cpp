@@ -7,22 +7,11 @@ using namespace SyntaxTree;
 
 extern SymTbl::SymbolTable symbolTable;
 
-void Variable::printTree() {
-	if(_next != NULL) {
-		_next->printTree();
-		std::cout << ", ";
-	}
-	std::cout << _id;
-	if(_value != NULL) {
-		std::cout << " = ";
-		_value->printTree();
-	}
-}
-
-BinaryOp::BinaryOp(Node* left, Operation op, Node* right) {
+BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->_type) {
 	if(!isValid(left, right, op)) {
-		yyerror("erro de operador");
+		yyerror("operation failed! expected one type and got another!");
 	}
+
 	_left = left;
 	_right = right;
 	_op = op;
@@ -33,8 +22,54 @@ bool BinaryOp::isValid() {
 }
 
 bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
-	// TODO make validation about binary op between two nodes
+	Type t1 = n1->_type, t2 = n2->_type;
+	
+	if(op == plus || op == minus || op == times || 
+		op == division || op == greater || op == less 
+		|| op == greater_equal || op == less_equal) {
+
+		return t1 != Type::t_bool && t2 != Type::t_bool;
+
+	} else if (op == bool_and || op == bool_or) {
+		return t1 == Type::t_bool && t2 == Type::t_bool;
+	} else if (op == assign) {
+		return t1 == t2;
+	}
+
 	return true;
+}
+
+Variable::Variable(std::string id, SymTbl::Symbol* symbol, 
+	Node* value, Declarable* next) : Declarable(id, symbol) {
+	_value = value;
+	_next = next;
+}
+
+Declarable::Declarable(std::string id, SymTbl::Symbol* symbol) : Node(symbol->_type) {
+	_id = id;
+	_symbol = symbol;
+}
+
+UnaryOp::UnaryOp(Node* node, UniOperation op) : Node(node->_type) {
+	_node = node;
+	_op = op;
+}
+
+Declaration::Declaration(Declarable* node) : Node(node->_symbol->_type) {
+	_node = node;
+}
+
+
+void Variable::printTree() {
+	if(_next != NULL) {
+		_next->printTree();
+		std::cout << ", ";
+	}
+	std::cout << _id;
+	if(_value != NULL) {
+		std::cout << " = ";
+		_value->printTree();
+	}
 }
 
 void BinaryOp::printTree() {
@@ -64,18 +99,6 @@ void Block::printTree() {
 		line->printTree();
 		std::cout << std::endl;
 	}
-}
-
-void Integer::printTree() {
-	std::cout << _value;
-}
-
-void Float::printTree() {
-	std::cout << _value;
-}
-
-void Bool::printTree() {
-	std::cout << ((_value) ? "true" : "false");
 }
 
 void UnaryOp::printTree() {

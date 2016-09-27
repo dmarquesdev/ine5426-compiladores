@@ -20,12 +20,12 @@ SyntaxTree::Declarable* SymbolTable::useVariable(std::string id) {
 	if(!contains(id)) { yyerror("Variable not defined yet! %s\n", id.c_str()); }
 	// if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
 
-	return new SyntaxTree::Variable(id, NULL, NULL, NULL);
+	return new SyntaxTree::Variable(id, &symbolList[id], NULL, NULL);
 }
 
 SyntaxTree::Declarable* SymbolTable::assignVariable(std::string id) {
 	if(!contains(id)) { yyerror("Variable not defined yet! %s\n", id.c_str()); }
 	symbolList[id]._initialized = true;
 
-	return new SyntaxTree::Variable(id, NULL, NULL, NULL);
+	return new SyntaxTree::Variable(id, &symbolList[id], NULL, NULL);
 }
