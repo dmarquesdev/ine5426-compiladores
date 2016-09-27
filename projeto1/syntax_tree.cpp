@@ -19,6 +19,24 @@ void Variable::printTree() {
 	}
 }
 
+BinaryOp::BinaryOp(Node* left, Operation op, Node* right) {
+	if(!isValid(left, right, op)) {
+		yyerror("erro de operador");
+	}
+	_left = left;
+	_right = right;
+	_op = op;
+}
+
+bool BinaryOp::isValid() {
+	return isValid(_left, _right, _op);
+}
+
+bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
+	// TODO make validation about binary op between two nodes
+	return true;
+}
+
 void BinaryOp::printTree() {
 	switch(_op) {
 		case plus: std::cout << "+ "; break;

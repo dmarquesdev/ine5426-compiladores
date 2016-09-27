@@ -61,9 +61,9 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
-%type <node> expr boolExpr line attr
-aritmExpr aritmTerm aritmValue
-%type <op> mult_op add_op
+%type <node> expr line attr
+exprTerm1 exprTerm2 exprTerm3 exprTerm4 exprValue
+%type <op> mult_op add_op bool_bin_op bool_rel_op bool_cmp_op
 %type <block> program lines
 %type <decl> varDecl
 
@@ -100,7 +100,6 @@ lines:
 
 line: 
     T_NL { $$ = NULL; } /*nothing here to be used */
-    | expr T_NL /*$$ = $1 when nothing is said*/
     | varDecl T_NL { $$ = new SyntaxTree::Declaration($1); } /* Variable declaration */
     | attr T_NL 
     ;
@@ -130,57 +129,71 @@ varDecl:
         $$ = symbolTable.newVariable($3, symbol, $1, $5); }
     ;
 
-expr:
-    aritmExpr 
-    | boolExpr 
-    ;
-
-/* The arithmetic expression grammar uses "stratified grammar" to
+/* The expression grammar uses "stratified grammar" to
  * avoid ambiguity
  * https://courses.engr.illinois.edu/cs421/sp2010/lectures/lecture10.pdf
  * Page 9
  */
-aritmExpr: 
-    aritmExpr add_op aritmTerm { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | aritmTerm
+expr:
+    expr bool_cmp_op exprTerm1 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | exprTerm1
     ;
 
-aritmTerm:
-    aritmTerm mult_op aritmValue { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | aritmValue
+exprTerm1:
+    exprTerm1 bool_bin_op exprTerm2 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | exprTerm2
     ;
 
-aritmValue:
+exprTerm2:
+    exprTerm2 bool_rel_op exprTerm3 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | exprTerm3
+    ;
+
+exprTerm3:
+    exprTerm3 add_op exprTerm4 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | exprTerm4
+    ;
+
+exprTerm4:
+    exprTerm4 mult_op exprValue { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    | exprValue
+    ;
+
+exprValue:
     T_INT { $$ = new SyntaxTree::Integer($1); }
     | T_FLOAT { $$ = new SyntaxTree::Float($1); }
+    | T_BOOL { $$ = new SyntaxTree::Bool($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
-    | T_OPEN_PAR aritmExpr T_CLOSE_PAR { $$ = $2; }
-    | T_SUB aritmValue %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
+    | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
+    | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
+    | T_NEGATION expr { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); }
     ;
 
 mult_op:
     T_TIMES { $$ = SyntaxTree::times; }
     | T_DIV { $$ = SyntaxTree::division; }
+    ;
 
 add_op:
     T_PLUS { $$ = SyntaxTree::plus; }
     | T_SUB { $$ = SyntaxTree::minus; }
+    ;
 
-/* End of Arithmetic expression */ 
+bool_rel_op:
+    T_BOOL_GR { $$ = SyntaxTree::greater; }
+    | T_BOOL_LS { $$ = SyntaxTree::less; }
+    | T_BOOL_GE { $$ = SyntaxTree::greater_equal; }
+    | T_BOOL_LE { $$ = SyntaxTree::less_equal; }
+    ;
 
-boolExpr:
-    T_BOOL { $$ = new SyntaxTree::Bool($1); }
-    | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
-    | T_OPEN_PAR boolExpr T_CLOSE_PAR { $$ = $2; }
-    | T_NEGATION boolExpr { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); }
-    | expr T_BOOL_EQ expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::equals, $3); }
-    | expr T_BOOL_NEQ expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::different, $3); }
-    | aritmExpr T_BOOL_GR aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::greater, $3); }
-    | aritmExpr T_BOOL_LS aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::less, $3); }
-    | aritmExpr T_BOOL_GE aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::greater_equal, $3); }
-    | aritmExpr T_BOOL_LE aritmExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::less_equal, $3); }
-    | boolExpr T_BOOL_AND boolExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::bool_and, $3); } 
-    | boolExpr T_BOOL_OR boolExpr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::bool_or, $3); } 
+bool_bin_op:
+    T_BOOL_AND { $$ = SyntaxTree::bool_and; }
+    | T_BOOL_OR { $$ = SyntaxTree::bool_or; }
+    ;
+
+bool_cmp_op:
+    T_BOOL_EQ { $$ = SyntaxTree::equals; }
+    | T_BOOL_NEQ { $$ = SyntaxTree::different; }
     ;
 
 %%

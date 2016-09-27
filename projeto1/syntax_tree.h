@@ -57,9 +57,11 @@ namespace SyntaxTree
 		Operation _op;
 		Node* _left;
 		Node* _right;
-		BinaryOp(Node* left, Operation op, Node* right) : 
-			_left(left), _op(op), _right(right) {}
+		BinaryOp(Node* left, Operation op, Node* right);
 		void printTree();
+		bool isValid();
+	private:
+		bool isValid(Node* n1, Node* n2, Operation op);
 	};
 
 	class Block : public Node {
