@@ -12,6 +12,8 @@
 SymTbl::SymbolTable symbolTable;
 SyntaxTree::Block* programRoot;
 
+typedef SymTbl::Symbol Symbol;
+
 extern int yylex();
 extern void yyerror(const char* s, ...);
 
@@ -35,7 +37,6 @@ extern void yyerror(const char* s, ...);
     bool bval;
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
-    SyntaxTree::Declarable* decl;
     SymTbl::Type type;
     SyntaxTree::Operation op;
 }
@@ -62,10 +63,10 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
  * Example: %type<node> expr
  */
 %type <node> expr line attr
-exprTerm1 exprTerm2 exprTerm3 exprTerm4 exprValue
+exprTerm1 exprTerm2 exprTerm3 exprTerm4 exprValue 
+varDecl varList var 
 %type <op> mult_op add_op bool_bin_op bool_rel_op bool_cmp_op
 %type <block> program lines
-%type <decl> varDecl
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -100,34 +101,28 @@ lines:
 
 line: 
     T_NL { $$ = NULL; } /*nothing here to be used */
-    | varDecl T_NL { $$ = new SyntaxTree::Declaration($1); } /* Variable declaration */
+    | varDecl T_NL /* Variable declaration */
     | attr T_NL 
     ;
 
-attr:
-    T_VAR_NAME T_ATTRIB expr { SyntaxTree::Declarable* node = symbolTable.assignVariable($1);
-            $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $3); }
 
 varDecl:
-    T_TYPE T_VAR_NAME { SymTbl::Symbol* symbol = 
-                        new SymTbl::Symbol($1, SymTbl::k_var, false); 
-                        $$ = symbolTable.newVariable($2, symbol, NULL, NULL); }
-
-    | T_TYPE T_VAR_NAME T_ATTRIB expr { 
-        SymTbl::Symbol* symbol = 
-            new SymTbl::Symbol($1, SymTbl::k_var, true); 
-        $$ = symbolTable.newVariable($2, symbol, NULL, $4); }
-
-    | varDecl T_COMMA T_VAR_NAME { 
-        SymTbl::Symbol* symbol = 
-            new SymTbl::Symbol($1->_symbol->_type, SymTbl::k_var, false); 
-        $$ = symbolTable.newVariable($3, symbol, $1, NULL); }
-
-    | varDecl T_COMMA T_VAR_NAME T_ATTRIB expr { 
-        SymTbl::Symbol* symbol = 
-            new SymTbl::Symbol($1->_symbol->_type, SymTbl::k_var, true); 
-        $$ = symbolTable.newVariable($3, symbol, $1, $5); }
+    T_TYPE varList { $$ = new SyntaxTree::Declaration($1, $2); }
     ;
+
+varList:
+    var { $$ = new SyntaxTree::List($1, NULL); }
+    | varList T_COMMA var { $$ = new SyntaxTree::List($3, $1); }
+    ;
+
+var:
+    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL); }
+    | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($1, $3); }
+    ;
+
+attr:
+    T_VAR_NAME T_ATTRIB expr { SyntaxTree::Node* node = symbolTable.assignVariable($1);
+            $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $3); }
 
 /* The expression grammar uses "stratified grammar" to
  * avoid ambiguity
@@ -160,9 +155,9 @@ exprTerm4:
     ;
 
 exprValue:
-    T_INT { $$ = new SyntaxTree::Node(SymTbl::Type::t_int); }
-    | T_FLOAT { $$ = new SyntaxTree::Node(SymTbl::Type::t_float); }
-    | T_BOOL { $$ = new SyntaxTree::Node(SymTbl::Type::t_bool); }
+    T_INT { $$ = new SyntaxTree::Integer($1); }
+    | T_FLOAT { $$ = new SyntaxTree::Float($1); }
+    | T_BOOL { $$ = new SyntaxTree::Boolean($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
     | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
     | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 

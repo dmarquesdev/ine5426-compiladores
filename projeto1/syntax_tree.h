@@ -8,7 +8,6 @@
 extern void yyerror(const char*, ...);
 
 namespace SymTbl {
-	class Symbol;
 	enum class Type;
 }
 
@@ -28,32 +27,35 @@ namespace SyntaxTree
 
 	class Node {
 	public:
-		Type _type;
 		Node() {}
-		Node(Type type) : _type(type) {}
+		Node(Type type) {
+			setType(type);
+		}
 		virtual ~Node(){}
 		virtual void printTree(){}
+		virtual void setType(Type type) { _type = type; }
+		Type getType() { return _type; }
+	private:
+		Type _type;
 	};
 
-	class Variable;
+	class List : public Node {
+	public:
+		Node* _node;
+		Node* _next;
+		void printTree();
+		List(Node* node, Node* next);
+		void setType(Type type);
+	};
 
-	class Declarable : public Node {
-		friend class Variable;
-		
+	class Variable : public Node {
 	public:
 		std::string _id;
-		SymTbl::Symbol* _symbol;
-		virtual void printTree() {}
-	private:
-		Declarable(std::string id, SymTbl::Symbol* symbol);
-	};
-
-	class Variable : public Declarable {
-	public:
-		Declarable* _next;
 		Node* _value;
-		Variable(std::string id, SymTbl::Symbol* symbol, Node* value, Declarable* next);
+		Variable(std::string id, Type type, Node* value);
 		void printTree();
+		void setType(Type type);
+		bool isValueValid();
 	};
 
 	class BinaryOp : public Node {
@@ -85,9 +87,31 @@ namespace SyntaxTree
 
 	class Declaration : public Node {
 	public:
-		Declarable* _node;
-		Declaration(Declarable* node);
+		Node* _node;
+		Declaration(Type type, Node* node);
 		void printTree();
+		void setType(Type type);
+	};
+
+	class Integer : public Node {
+	public:
+		int _value;
+		Integer(int value);
+		void printTree() { std::cout << _value; }
+	};
+
+	class Float : public Node {
+	public:
+		float _value;
+		Float(float value);
+		void printTree() { std::cout << _value; }
+	};
+
+	class Boolean : public Node {
+	public:
+		bool _value;
+		Boolean(bool value);
+		void printTree() { std::cout << ((_value) ? "true" : "false"); }
 	};
 	
 }

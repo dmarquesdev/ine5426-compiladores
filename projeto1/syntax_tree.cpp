@@ -7,9 +7,13 @@ using namespace SyntaxTree;
 
 extern SymTbl::SymbolTable symbolTable;
 
-BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->_type) {
+typedef SymTbl::Symbol Symbol;
+
+BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()) {
 	if(!isValid(left, right, op)) {
-		yyerror("operation failed! expected one type and got another!");
+		yyerror("operation expected %s but received %s\n", 
+			Symbol::typeToString(left->getType()), 
+			Symbol::typeToString(right->getType()));
 	}
 
 	_left = left;
@@ -22,7 +26,7 @@ bool BinaryOp::isValid() {
 }
 
 bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
-	Type t1 = n1->_type, t2 = n2->_type;
+	Type t1 = n1->getType(), t2 = n2->getType();
 	
 	if(op == plus || op == minus || op == times || 
 		op == division || op == greater || op == less 
@@ -39,37 +43,80 @@ bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
 	return true;
 }
 
-Variable::Variable(std::string id, SymTbl::Symbol* symbol, 
-	Node* value, Declarable* next) : Declarable(id, symbol) {
+Variable::Variable(std::string id, Type type, Node* value) : Node(type) {
+	_id = id;
 	_value = value;
+}
+
+List::List(Node* node, Node* next) : Node(node->getType()) {
+	_node = node;
 	_next = next;
 }
 
-Declarable::Declarable(std::string id, SymTbl::Symbol* symbol) : Node(symbol->_type) {
-	_id = id;
-	_symbol = symbol;
-}
-
-UnaryOp::UnaryOp(Node* node, UniOperation op) : Node(node->_type) {
+UnaryOp::UnaryOp(Node* node, UniOperation op) : Node(node->getType()) {
 	_node = node;
 	_op = op;
 }
 
-Declaration::Declaration(Declarable* node) : Node(node->_symbol->_type) {
+Declaration::Declaration(Type type, Node* node) : Node(type) {
 	_node = node;
+	setType(type);
 }
 
+Integer::Integer(int value) : Node(Type::t_int), _value(value) {}
+Float::Float(float value) : Node(Type::t_float), _value(value) {}
+Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
+
+void Declaration::setType(Type type) {
+	Node::setType(type);
+
+	_node->setType(type);
+}
+
+void List::setType(Type type) {
+	Node::setType(type);
+
+	_node->setType(type);
+
+	if(_next != NULL) {
+		_next->setType(type);
+	}
+}
+
+void Variable::setType(Type type) {
+	Node::setType(type);
+
+	if(!isValueValid()) {
+		yyerror("attribution operation expected %s but received %s\n", 
+			Symbol::typeToString(type), 
+			Symbol::typeToString(_value->getType()));
+	}
+
+	symbolTable.setType(_id, type);
+}
+
+bool Variable::isValueValid() {
+	 if(_value != NULL) { 
+	 	return _value->getType() == getType(); 
+	 } 
+
+	 return true;
+}
 
 void Variable::printTree() {
-	if(_next != NULL) {
-		_next->printTree();
-		std::cout << ", ";
-	}
 	std::cout << _id;
 	if(_value != NULL) {
 		std::cout << " = ";
 		_value->printTree();
 	}
+}
+
+void List::printTree() {
+	if(_next != NULL) {
+		_next->printTree();
+		std::cout << ", ";
+	}
+	_node->printTree();
 }
 
 void BinaryOp::printTree() {
@@ -110,11 +157,7 @@ void UnaryOp::printTree() {
 }
 
 void Declaration::printTree() {
-	switch(_node->_symbol->_type) {
-		case SymTbl::Type::t_int: std::cout << "int "; break;
-		case SymTbl::Type::t_float: std::cout << "float "; break;
-		case SymTbl::Type::t_bool: std::cout << "bool "; break;
-	}
+	std::cout << Symbol::typeToString(getType()) << " ";
 	std::cout << "var: ";
 	_node->printTree();
 }

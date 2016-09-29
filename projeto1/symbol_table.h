@@ -10,7 +10,7 @@ extern void yyerror(const char* msg, ...);
 
 namespace SymTbl
 {
-	enum class Type { t_int, t_float, t_bool };
+	enum class Type { unknown, t_int, t_float, t_bool };
 
 	enum Kind { k_var, k_func };
 
@@ -24,18 +24,20 @@ namespace SymTbl
 		Kind _kind;
 		bool _initialized;
 
-		Symbol(Type type, Kind kind, bool initialized) :
+		Symbol(Type type = Type::unknown, Kind kind = k_var, bool initialized = false) :
 			_type(type), _kind(kind), _initialized(initialized) {}
-		Symbol() {_type = Type::t_int; _kind = k_var; _initialized = false;}
+
+		static const char* typeToString(Type type);
 	};
 
 	class SymbolTable {
 	public:
 		SymbolTable() {}
 		SymbolList symbolList;
-		SyntaxTree::Declarable* newVariable(std::string id, Symbol* symbol, SyntaxTree::Declarable* next, SyntaxTree::Node* value);
-		SyntaxTree::Declarable* useVariable(std::string id);
-		SyntaxTree::Declarable* assignVariable(std::string id);
+		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* value);
+		SyntaxTree::Node* useVariable(std::string id);
+		SyntaxTree::Node* assignVariable(std::string id);
+		void setType(std::string id, Type type) { symbolList[id]._type = type; }
 		bool contains(std::string id) {return symbolList.find(id) != symbolList.end(); }
 	};
 }
