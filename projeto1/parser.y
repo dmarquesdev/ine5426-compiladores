@@ -70,7 +70,7 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
  */
 %type <node> expr line attr exprValue 
 varDecl varList var 
-%type <block> program lines
+%type <block> program lines conditional
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -102,6 +102,8 @@ lines:
     line { $$ = new SyntaxTree::Block(); if($1 != NULL) $$->_lines.push_back($1); }
     /* Add the line to the lines block in tree */
     | lines line { if($2 != NULL) $$->_lines.push_back($2); }
+    | conditional 
+    | lines conditional { $$->append($2); }
     ;
 
 line: 
@@ -159,5 +161,13 @@ exprValue:
     | T_FLOAT { $$ = new SyntaxTree::Float($1); }
     | T_BOOL { $$ = new SyntaxTree::Boolean($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
+    ;
+
+conditional:
+    T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK { $$ = new SyntaxTree::Conditional($2, $7, NULL); }
+    | T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines 
+        T_CLOSE_CBRACK T_ELSE T_OPEN_CBRACK T_NL lines 
+        T_CLOSE_CBRACK { $$ = new SyntaxTree::Conditional($2, $7, $12); }
+    ;
 
 %%

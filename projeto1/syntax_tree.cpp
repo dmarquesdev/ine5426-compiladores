@@ -88,6 +88,14 @@ Declaration::Declaration(Type type, Node* node) : Node(type) {
 	setType(type);
 }
 
+Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) : 
+	_condition(condition), _ifBlock(ifBlock), _elseBlock(elseBlock) {
+	_ifBlock->_parent = this;
+	if(_elseBlock != NULL) {
+		_elseBlock->_parent = this;
+	}
+}
+
 Integer::Integer(int value) : Node(Type::t_int), _value(value) {}
 Float::Float(float value) : Node(Type::t_float), _value(value) {}
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
@@ -142,6 +150,19 @@ bool Variable::isValueValid() {
 	 return true;
 }
 
+int Block::getLevel() { 
+	if(_parent == NULL) {
+		return 0;
+	} else {
+		return _parent->getLevel() + 1;
+	}
+}
+
+void Block::append(Block* block) {
+	_lines.push_back(block);
+	block->_parent = this;
+}
+
 void Variable::printTree() {
 	std::cout << _id;
 	if(_value != NULL) {
@@ -167,7 +188,16 @@ void BinaryOp::printTree() {
 }
 
 void Block::printTree() {
+	int level = getLevel();
+
+	if(level > 0) {
+		level--;
+	}
+
+	std::string tab = std::string(level*2, ' ');
+
 	for(Node* line : _lines) {
+		std::cout << tab;
 		line->printTree();
 		std::cout << std::endl;
 	}
@@ -191,6 +221,25 @@ void Declaration::printTree() {
 void Cast::printTree() {
 	std::cout << "[" << Symbol::typeToString(getType()) << "] ";
 	_node->printTree();
+}
+
+void Conditional::printTree() {
+	int level = getLevel();
+
+	if(level > 0) {
+		level--;
+	}
+
+	std::string tab = std::string(level*2, ' ');
+
+	std::cout << tab << "if: ";
+	_condition->printTree();
+	std::cout << "\n" << tab << "then: " << std::endl;
+	_ifBlock->printTree();
+	if(_elseBlock != NULL) {
+		std::cout << "\n" << tab << "else: " << std::endl;
+		_elseBlock->printTree();
+	}
 }
 
 const char* Node::operationToString(Operation op) {

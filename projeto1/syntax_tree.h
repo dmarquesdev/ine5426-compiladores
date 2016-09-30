@@ -81,7 +81,20 @@ namespace SyntaxTree
 	class Block : public Node {
 	public:
 		NodeList _lines;
+		Block* _parent;
 		Block() {}
+		virtual void printTree();
+		int getLevel();
+		void append(Block* block);
+	};
+
+	class Conditional : public Block {
+	public:
+		Node* _condition;
+		Block* _ifBlock;
+		Block* _elseBlock;
+		Conditional(Node* condition, 
+			Block* ifBlock, Block* elseBlock);
 		void printTree();
 	};
 
