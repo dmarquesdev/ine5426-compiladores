@@ -94,6 +94,11 @@ Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) :
 	if(_elseBlock != NULL) {
 		_elseBlock->_parent = this;
 	}
+
+	if(_condition->getType() != Type::t_bool) {
+		error("semantic", "test operation expected boolean but received %s", 
+			Symbol::typeToString(_condition->getType()));
+	}
 }
 
 Integer::Integer(int value) : Node(Type::t_int), _value(value) {}
