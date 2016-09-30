@@ -38,7 +38,6 @@ extern void yyerror(const char* s, ...);
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
     SymTbl::Type type;
-    SyntaxTree::Operation op;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -62,10 +61,8 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
-%type <node> expr line attr
-exprTerm1 exprTerm2 exprTerm3 exprTerm4 exprValue 
+%type <node> expr line attr exprValue 
 varDecl varList var 
-%type <op> mult_op add_op bool_bin_op bool_rel_op bool_cmp_op
 %type <block> program lines
 
 /* Operator precedence for mathematical operators
@@ -73,9 +70,9 @@ varDecl varList var
  * left, right, nonassoc
  */
 
- %left T_NEGATION 
- %left T_BOOL_EQ T_BOOL_NEQ T_BOOL_GR T_BOOL_LS T_BOOL_GE T_BOOL_LE 
  %left T_BOOL_AND T_BOOL_OR 
+ %left T_BOOL_EQ T_BOOL_NEQ T_BOOL_GR T_BOOL_LS T_BOOL_GE T_BOOL_LE 
+ %left T_NEGATION 
  %left T_PLUS T_SUB
  %left T_TIMES T_DIV
  %left USUB
@@ -130,28 +127,22 @@ attr:
  * Page 9
  */
 expr:
-    expr bool_cmp_op exprTerm1 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | exprTerm1
-    ;
-
-exprTerm1:
-    exprTerm1 bool_bin_op exprTerm2 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | exprTerm2
-    ;
-
-exprTerm2:
-    exprTerm2 bool_rel_op exprTerm3 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | exprTerm3
-    ;
-
-exprTerm3:
-    exprTerm3 add_op exprTerm4 { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
-    | exprTerm4
-    ;
-
-exprTerm4:
-    exprTerm4 mult_op exprValue { $$ = new SyntaxTree::BinaryOp($1, $2, $3); }
+    expr T_TIMES expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::times, $3); }
+    | expr T_DIV expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::division, $3); }
+    | expr T_PLUS expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::plus, $3); }
+    | expr T_SUB expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::minus, $3); }
+    | expr T_BOOL_GR expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::greater, $3); }
+    | expr T_BOOL_LS expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::less, $3); }
+    | expr T_BOOL_GE expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::greater_equal, $3); }
+    | expr T_BOOL_LE expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::less_equal, $3); }
+    | expr T_BOOL_EQ expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::equals, $3); }
+    | expr T_BOOL_NEQ expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::different, $3); }
+    | expr T_BOOL_AND expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::bool_and, $3); }
+    | expr T_BOOL_OR expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::bool_or, $3); }
     | exprValue
+    | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
+    | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
+    | T_NEGATION expr { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); }
     ;
 
 exprValue:
@@ -159,37 +150,6 @@ exprValue:
     | T_FLOAT { $$ = new SyntaxTree::Float($1); }
     | T_BOOL { $$ = new SyntaxTree::Boolean($1); }
     | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
-    | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
-    | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
-    | T_NEGATION expr { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); }
-    ;
-
-mult_op:
-    T_TIMES { $$ = SyntaxTree::times; }
-    | T_DIV { $$ = SyntaxTree::division; }
-    ;
-
-add_op:
-    T_PLUS { $$ = SyntaxTree::plus; }
-    | T_SUB { $$ = SyntaxTree::minus; }
-    ;
-
-bool_rel_op:
-    T_BOOL_GR { $$ = SyntaxTree::greater; }
-    | T_BOOL_LS { $$ = SyntaxTree::less; }
-    | T_BOOL_GE { $$ = SyntaxTree::greater_equal; }
-    | T_BOOL_LE { $$ = SyntaxTree::less_equal; }
-    ;
-
-bool_bin_op:
-    T_BOOL_AND { $$ = SyntaxTree::bool_and; }
-    | T_BOOL_OR { $$ = SyntaxTree::bool_or; }
-    ;
-
-bool_cmp_op:
-    T_BOOL_EQ { $$ = SyntaxTree::equals; }
-    | T_BOOL_NEQ { $$ = SyntaxTree::different; }
-    ;
 
 %%
 

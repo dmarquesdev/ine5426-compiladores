@@ -35,6 +35,7 @@ namespace SyntaxTree
 		virtual void printTree(){}
 		virtual void setType(Type type) { _type = type; }
 		Type getType() { return _type; }
+		static const char* operationToString(Operation op);
 	private:
 		Type _type;
 	};

@@ -21,4 +21,4 @@ clean:
 	rm parser.cpp parser.h scanner.cpp ${OUTPUT} parser.output
 
 test: all
-	./${OUTPUT} < amb_error.in
+	./${OUTPUT} < tests/v0.2/2.in

@@ -11,7 +11,8 @@ typedef SymTbl::Symbol Symbol;
 
 BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()) {
 	if(!isValid(left, right, op)) {
-		yyerror("operation expected %s but received %s\n", 
+		yyerror("%s operation expected %s but received %s\n", 
+			Node::operationToString(op), 
 			Symbol::typeToString(left->getType()), 
 			Symbol::typeToString(right->getType()));
 	}
@@ -19,6 +20,12 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 	_left = left;
 	_right = right;
 	_op = op;
+
+	if(op == greater || op == less 
+		|| op == greater_equal || op == less_equal 
+		|| op == bool_and || op == bool_or) {
+		setType(Type::t_bool);
+	}
 }
 
 bool BinaryOp::isValid() {
@@ -120,21 +127,7 @@ void List::printTree() {
 }
 
 void BinaryOp::printTree() {
-	switch(_op) {
-		case plus: std::cout << "+ "; break;
-		case minus: std::cout << "- "; break;
-		case times: std::cout << "* "; break;
-		case division: std::cout << "/ "; break;
-		case assign: std::cout << "= "; break;
-		case equals: std::cout << "== "; break;
-		case different: std::cout << "!= "; break;
-		case greater: std::cout << "> "; break;
-		case less: std::cout << "< "; break;
-		case greater_equal: std::cout << ">= "; break;
-		case less_equal: std::cout << "<= "; break;
-		case bool_and: std::cout << "& "; break;
-		case bool_or: std::cout << "| "; break;
-	}
+	std::cout << Node::operationToString(_op) << " ";
 
 	_left->printTree();
 	std::cout << " ";
@@ -160,4 +153,22 @@ void Declaration::printTree() {
 	std::cout << Symbol::typeToString(getType()) << " ";
 	std::cout << "var: ";
 	_node->printTree();
+}
+
+const char* Node::operationToString(Operation op) {
+	switch(op) {
+		case plus: return "+";
+		case minus: return "-";
+		case times: return "*";
+		case division: return "/";
+		case assign: return "=";
+		case equals: return "==";
+		case different: return "!=";
+		case greater: return ">";
+		case less: return "<";
+		case greater_equal: return ">=";
+		case less_equal: return "<=";
+		case bool_and: return "&";
+		case bool_or: return "|";
+	}
 }
