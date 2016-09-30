@@ -12,13 +12,13 @@ clang: *.cpp *.h
 	${CC} -o ${OUTPUT} *.cpp ${LLVMPARAM} ${PARAM}
 
 yacc: parser.y
-	${BISON} --defines=parser.h --output=parser.cpp parser.y
+	${BISON} --defines=parser.h --output=parser.cpp parser.y -v
 
 flex: scanner.l
 	${FLEX} -o scanner.cpp scanner.l 
 
 clean:
-	rm parser.cpp parser.h scanner.cpp ${OUTPUT}
+	rm parser.cpp parser.h scanner.cpp ${OUTPUT} parser.output
 
 test: all
-	./${OUTPUT} < 3.in
+	./${OUTPUT} < tests/v0.2/input/2.in

@@ -1,20 +1,19 @@
 /* Inspirated by https://github.com/llpilla/compiler_examples/blob/master/simple_ast/st.h */
 
-/* 
- * Symbol Table model, to use in compilers parser
- */
-
-#pragma once
+#ifndef DRD_SYMBOL_TABLE_H
+#define DRD_SYMBOL_TABLE_H
 
 #include <map>
+#include <iostream>
 #include "syntax_tree.h"
 
 extern void error(const char* type, const char* msg, ...);
 
 namespace SymTbl
 {
-	enum Type { integer };
-	enum Kind { variable };
+	enum class Type { unknown, t_int, t_float, t_bool };
+
+	enum Kind { k_var, k_func };
 
 	class Symbol;
 
@@ -25,18 +24,23 @@ namespace SymTbl
 		Type _type;
 		Kind _kind;
 		bool _initialized;
-		Symbol(Type type, Kind kind, bool initialized) :
+
+		Symbol(Type type = Type::unknown, Kind kind = k_var, bool initialized = false) :
 			_type(type), _kind(kind), _initialized(initialized) {}
-		Symbol() {_type = integer; _kind = variable; _initialized = false;}
+
+		static const char* typeToString(Type type);
 	};
 
 	class SymbolTable {
 	public:
 		SymbolTable() {}
 		SymbolList symbolList;
-		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* next, SyntaxTree::Node* value);
+		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* value);
 		SyntaxTree::Node* useVariable(std::string id);
 		SyntaxTree::Node* assignVariable(std::string id);
+		void setType(std::string id, Type type) { symbolList[id]._type = type; }
 		bool contains(std::string id) {return symbolList.find(id) != symbolList.end(); }
 	};
 }
+
+#endif

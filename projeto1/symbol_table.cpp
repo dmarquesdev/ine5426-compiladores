@@ -6,23 +6,16 @@ using namespace SymTbl;
 
 extern SymbolTable symbolTable;
 
-/* 
- * Register a new Variable in the Symbol Table 
- * param id: variable id
- * param next: In case of multiple declaration, the next declaration node
- * param value: The value attributed to the variable
- *
- * It returns a Syntax Tree's variable
- */
-SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* next, SyntaxTree::Node* value) {
+SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* value) {
+	Symbol symbol(Type::unknown, k_var, (value != NULL));
+
 	if (!contains(id)) {
-		Symbol newSymbol(integer, variable, (value != NULL));
-		symbolList[id] = newSymbol;
+		symbolList[id] = symbol;
 	} else {
 		error("semantic", "re-declaration of variable %s\n", id.c_str());
 	}
 
-	return new SyntaxTree::Variable(id, value, next);
+	return new SyntaxTree::Variable(id, Type::unknown, value);
 }
 
 /* 
@@ -35,7 +28,7 @@ SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
 	if(!contains(id)) { error("semantic", "undeclared variable %s\n", id.c_str()); }
 	// if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
 
-	return new SyntaxTree::Variable(id, NULL, NULL);
+	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
 }
 
 /* 
@@ -48,5 +41,14 @@ SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
 	if(!contains(id)) { error("semantic", "undeclared variable %s\n", id.c_str()); }
 	symbolList[id]._initialized = true;
 
-	return new SyntaxTree::Variable(id, NULL, NULL);
+	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
+}
+
+const char* Symbol::typeToString(Type type) {
+	switch(type) {
+		case SymTbl::Type::t_int: return "int"; 
+		case SymTbl::Type::t_float: return "float";
+		case SymTbl::Type::t_bool: return "bool";
+		case SymTbl::Type::unknown: return "unknown";
+	}
 }
