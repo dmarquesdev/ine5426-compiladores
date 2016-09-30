@@ -17,7 +17,7 @@ namespace SyntaxTree
 		greater, greater_equal, equals, less, less_equal, 
 		different, bool_and, bool_or };
 
-	enum UniOperation { negative, negation };
+	enum UniOperation { negative, negation, casting };
 
 	class Node;
 
@@ -57,6 +57,8 @@ namespace SyntaxTree
 		void printTree();
 		void setType(Type type);
 		bool isValueValid();
+	private:
+		void coercion();
 	};
 
 	class BinaryOp : public Node {
@@ -69,6 +71,7 @@ namespace SyntaxTree
 		bool isValid();
 	private:
 		bool isValid(Node* n1, Node* n2, Operation op);
+		void coercion(Node* n1, Node* n2);
 	};
 
 	class Block : public Node {
@@ -83,6 +86,12 @@ namespace SyntaxTree
 		Node* _node;
 		UniOperation _op;
 		UnaryOp(Node* node, UniOperation op);
+		virtual void printTree();
+	};
+
+	class Cast : public UnaryOp {
+	public:
+		Cast(Type type, Node* node);
 		void printTree();
 	};
 

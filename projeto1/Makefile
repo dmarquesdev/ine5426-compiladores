@@ -21,4 +21,4 @@ clean:
 	rm parser.cpp parser.h scanner.cpp ${OUTPUT} parser.output
 
 test: all
-	./${OUTPUT} < tests/v0.2/input/2.in
+	./${OUTPUT} < tests/v0.3/input/2.in

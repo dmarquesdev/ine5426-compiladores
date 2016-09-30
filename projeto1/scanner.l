@@ -22,6 +22,7 @@ boolean (true|false)
 
 var_name [a-zA-Z]([a-zA-Z0-9_])*
 type (int|float|bool)
+cast \[{type}\]
 
 %%
 
@@ -30,6 +31,7 @@ type (int|float|bool)
 {integer}           {yylval.ival = std::atoi(yytext); return T_INT;}
 {boolean}			{yylval.bval = std::strncmp(yytext, "true", 4) == 0; return T_BOOL;}
 {type}				{yylval.type = to_type(yytext); return T_TYPE;}
+{cast}				{yylval.type = to_type(yytext); return T_CAST;}
 \+                 	{return T_PLUS;}
 \*                  {return T_TIMES;}
 \-                  {return T_SUB;}
@@ -56,9 +58,12 @@ type (int|float|bool)
 SymTbl::Type to_type(const char* token) {
 	SymTbl::Type type;
 
-	if (strncmp(token, "int", 3) == 0) { type = SymTbl::Type::t_int; }
-	else if (strncmp(token, "float", 5) == 0) { type = SymTbl::Type::t_float; }
-	else if (strncmp(token, "bool", 4) == 0) { type = SymTbl::Type::t_bool; }
+	if (strncmp(token, "int", 3) == 0 
+		|| strncmp(token, "[int]", 5) == 0) { type = SymTbl::Type::t_int; }
+	else if (strncmp(token, "float", 5) == 0 
+		|| strncmp(token, "[float]", 7) == 0) { type = SymTbl::Type::t_float; }
+	else if (strncmp(token, "bool", 4) == 0 
+		|| strncmp(token, "[bool]", 6) == 0) { type = SymTbl::Type::t_bool; }
 
 	return type;
 }

@@ -52,7 +52,7 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
 
 %token <cval> T_VAR_NAME
 
-%token <type> T_TYPE 
+%token <type> T_TYPE T_CAST
 
 %token <fval> T_FLOAT
 
@@ -71,6 +71,7 @@ varDecl varList var
  * left, right, nonassoc
  */
 
+ %left T_CAST
  %left T_BOOL_AND T_BOOL_OR 
  %left T_BOOL_EQ T_BOOL_NEQ T_BOOL_GR T_BOOL_LS T_BOOL_GE T_BOOL_LE 
  %left T_NEGATION 
@@ -144,6 +145,7 @@ expr:
     | T_OPEN_PAR expr T_CLOSE_PAR { $$ = $2; }
     | T_SUB expr %prec USUB { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negative); } 
     | T_NEGATION expr { $$ = new SyntaxTree::UnaryOp($2, SyntaxTree::negation); }
+    | T_CAST expr { $$ = new SyntaxTree::Cast($1, $2); }
     ;
 
 exprValue:

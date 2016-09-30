@@ -10,13 +10,6 @@ extern SymTbl::SymbolTable symbolTable;
 typedef SymTbl::Symbol Symbol;
 
 BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()) {
-	if(!isValid(left, right, op)) {
-		error("semantic", "%s operation expected %s but received %s\n", 
-			Node::operationToString(op), 
-			Symbol::typeToString(left->getType()), 
-			Symbol::typeToString(right->getType()));
-	}
-
 	_left = left;
 	_right = right;
 	_op = op;
@@ -26,6 +19,13 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 		|| op == bool_and || op == bool_or) {
 		setType(Type::t_bool);
 	}
+
+	if(!isValid(left, right, op)) {
+		error("semantic", "%s operation expected %s but received %s\n", 
+			Node::operationToString(op), 
+			Symbol::typeToString(left->getType()), 
+			Symbol::typeToString(right->getType()));
+	}
 }
 
 bool BinaryOp::isValid() {
@@ -33,14 +33,14 @@ bool BinaryOp::isValid() {
 }
 
 bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
+	coercion(n1, n2);
+
 	Type t1 = n1->getType(), t2 = n2->getType();
 	
 	if(op == plus || op == minus || op == times || 
 		op == division || op == greater || op == less 
 		|| op == greater_equal || op == less_equal) {
-
 		return t1 != Type::t_bool && t2 != Type::t_bool;
-
 	} else if (op == bool_and || op == bool_or) {
 		return t1 == Type::t_bool && t2 == Type::t_bool;
 	} else if (op == assign) {
@@ -48,6 +48,20 @@ bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
 	}
 
 	return true;
+}
+
+void BinaryOp::coercion(Node* n1, Node* n2) {
+	Type t1 = n1->getType(), t2 = n2->getType();
+
+	if(t1 == Type::t_float && t2 == Type::t_int) {
+		Cast* cast = new Cast(Type::t_float, n2);
+		_right = cast;
+		setType(Type::t_float);
+	} else if(t2 == Type::t_float && t1 == Type::t_int) {
+		Cast* cast = new Cast(Type::t_float, n1);
+		_left = cast;
+		setType(Type::t_float);
+	}
 }
 
 Variable::Variable(std::string id, Type type, Node* value) : Node(type) {
@@ -63,6 +77,10 @@ List::List(Node* node, Node* next) : Node(node->getType()) {
 UnaryOp::UnaryOp(Node* node, UniOperation op) : Node(node->getType()) {
 	_node = node;
 	_op = op;
+}
+
+Cast::Cast(Type type, Node* node) : UnaryOp(node, casting) {
+	setType(type);
 }
 
 Declaration::Declaration(Type type, Node* node) : Node(type) {
@@ -92,19 +110,33 @@ void List::setType(Type type) {
 
 void Variable::setType(Type type) {
 	Node::setType(type);
+	symbolTable.setType(_id, type);
 
 	if(!isValueValid()) {
 		error("semantic", "attribution operation expected %s but received %s\n", 
 			Symbol::typeToString(type), 
 			Symbol::typeToString(_value->getType()));
+	} else if(_value != NULL) {
+		coercion();
 	}
+}
 
-	symbolTable.setType(_id, type);
+void Variable::coercion() {
+	if(getType() == Type::t_int && _value->getType() == Type::t_float) {
+		_value = new Cast(Type::t_int, _value);
+	} else if(getType() == Type::t_float && _value->getType() == Type::t_int) {
+		_value = new Cast(Type::t_float, _value);
+	}
 }
 
 bool Variable::isValueValid() {
 	 if(_value != NULL) { 
-	 	return _value->getType() == getType(); 
+	 	Type t1 = _value->getType(), t2 = getType();
+
+	 	bool numeric = (t1 == Type::t_int || t1 == Type::t_float) 
+	 	&& (t2 == Type::t_int || t2 == Type::t_float);
+
+	 	return t1 == t2 || numeric; 
 	 } 
 
 	 return true;
@@ -145,6 +177,7 @@ void UnaryOp::printTree() {
 	switch(_op) {
 		case negative: std::cout << "-u "; break;
 		case negation: std::cout << "! "; break;
+		default: break;
 	}
 	_node->printTree();
 }
@@ -152,6 +185,11 @@ void UnaryOp::printTree() {
 void Declaration::printTree() {
 	std::cout << Symbol::typeToString(getType()) << " ";
 	std::cout << "var: ";
+	_node->printTree();
+}
+
+void Cast::printTree() {
+	std::cout << "[" << Symbol::typeToString(getType()) << "] ";
 	_node->printTree();
 }
 
