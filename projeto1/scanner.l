@@ -27,11 +27,20 @@ cast \[{type}\]
 %%
 
 [ \t]               ; //ignores spaces
+
 {float}				{yylval.fval = std::atof(yytext); return T_FLOAT;}
 {integer}           {yylval.ival = std::atoi(yytext); return T_INT;}
 {boolean}			{yylval.bval = std::strncmp(yytext, "true", 4) == 0; return T_BOOL;}
+
 {type}				{yylval.type = to_type(yytext); return T_TYPE;}
 {cast}				{yylval.type = to_type(yytext); return T_CAST;}
+"if"				{return T_IF;}
+"then"				{return T_THEN;}
+"else"				{return T_ELSE;}
+
+\{					{return T_OPEN_CBRACK;}
+\}					{return T_CLOSE_CBRACK;}
+
 \+                 	{return T_PLUS;}
 \*                  {return T_TIMES;}
 \-                  {return T_SUB;}
@@ -50,6 +59,7 @@ cast \[{type}\]
 "<="				{return T_BOOL_LE;}
 \&					{return T_BOOL_AND;}
 "|"					{return T_BOOL_OR;}
+
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
 .                   {error("lexical", "unknown symbol %c\n", *yytext);} /*complains about every unknown character*/
 

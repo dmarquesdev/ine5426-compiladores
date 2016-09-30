@@ -19,6 +19,10 @@ namespace SyntaxTree
 
 	enum UniOperation { negative, negation, casting };
 
+	enum Reserved { w_if, w_then, w_else };
+
+	enum Delimiter { open_curly_bracket, close_curly_bracket };
+
 	class Node;
 
 	typedef std::vector<Node*> NodeList;

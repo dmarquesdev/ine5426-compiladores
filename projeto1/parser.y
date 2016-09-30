@@ -39,6 +39,8 @@ extern void error(const char* type, const char* s, ...);
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
     SymTbl::Type type;
+    SyntaxTree::Reserved rword;
+    SyntaxTree::Delimiter delimiter;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -57,6 +59,10 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
 %token <fval> T_FLOAT
 
 %token <bval> T_BOOL
+
+%token <rword> T_IF T_THEN T_ELSE
+
+%token <delimiter> T_OPEN_CBRACK T_CLOSE_CBRACK
 
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
