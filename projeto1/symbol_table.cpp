@@ -6,6 +6,13 @@ using namespace SymTbl;
 
 extern SymbolTable symbolTable;
 
+/* 
+ * Crate a new variable node at syntax tree 
+ * param id: variable id
+ * param value: variable value
+ *
+ * It returns a Syntax Tree's variable
+ */
 SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* value) {
 	Symbol symbol(Type::unknown, k_var, (value != NULL));
 
