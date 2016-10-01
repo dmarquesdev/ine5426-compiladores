@@ -39,8 +39,7 @@ extern void error(const char* type, const char* s, ...);
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
     SymTbl::Type type;
-    SyntaxTree::Reserved rword;
-    SyntaxTree::Delimiter delimiter;
+    SyntaxTree::ForLoop* floop;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -49,6 +48,8 @@ extern void error(const char* type, const char* s, ...);
 T_CLOSE_PAR T_ATTRIB T_COMMA T_NEGATION 
 T_BOOL_EQ T_BOOL_NEQ T_BOOL_GR T_BOOL_LS 
 T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR 
+T_IF T_THEN T_ELSE T_OPEN_CBRACK T_CLOSE_CBRACK 
+T_FOR
 
 %token <ival> T_INT
 
@@ -60,17 +61,14 @@ T_BOOL_GE T_BOOL_LE T_BOOL_AND T_BOOL_OR
 
 %token <bval> T_BOOL
 
-%token <rword> T_IF T_THEN T_ELSE
-
-%token <delimiter> T_OPEN_CBRACK T_CLOSE_CBRACK
-
 /* type defines the type of our nonterminal symbols.
  * Types should match the names used in the union.
  * Example: %type<node> expr
  */
 %type <node> expr line attr exprValue 
 varDecl varList var 
-%type <block> program lines conditional
+%type <block> program lines conditional forLoop
+%type <floop> forParams
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -104,6 +102,8 @@ lines:
     | lines line { if($2 != NULL) $$->_lines.push_back($2); }
     | conditional 
     | lines conditional { $$->append($2); }
+    | forLoop
+    | lines forLoop { $$->append($2); }
     ;
 
 line: 
@@ -170,4 +170,15 @@ conditional:
         T_CLOSE_CBRACK { $$ = new SyntaxTree::Conditional($2, $7, $12); }
     ;
 
+forLoop:
+    T_FOR forParams T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK { $2->setForBlock($5); $$ = $2; }
+    | T_FOR forParams T_OPEN_CBRACK T_NL T_CLOSE_CBRACK { $$ = $2; }
+    ;
+
+forParams:
+    attr T_COMMA expr T_COMMA attr { $$ = new SyntaxTree::ForLoop($1, $3, $5); }
+    | attr T_COMMA expr T_COMMA { $$ = new SyntaxTree::ForLoop($1, $3, NULL); }
+    | T_COMMA expr T_COMMA attr { $$ = new SyntaxTree::ForLoop(NULL, $2, $4); }
+    | T_COMMA expr T_COMMA { $$ = new SyntaxTree::ForLoop(NULL, $2, NULL); }
+    ;
 %%

@@ -173,14 +173,40 @@ Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) :
 }
 
 /*
-* Contrutor do tipo integer
+* Contrutor de loop(for)
+*
+* param initialization: inicialização de variavel para iteração.
+* param test: nodo que contem o teste para fim de loop.
+* param iteração: nodo que tem o codigo de iteração do loop.
+* 
+*/
+ForLoop::ForLoop(Node* initialization, Node* test, Node* iteration) : 
+	_initialization(initialization), _test(test), _iteration(iteration) {
+	if(_test->getType() != Type::t_bool) {
+		error("semantic", "for loop test operation expected boolean but received %s", 
+			Symbol::typeToString(_test->getType()));
+	}
+}
+
+/*
+* Contrutor do tipo integer.
 *
 * param value: valor da variavel.
 */
 Integer::Integer(int value) : Node(Type::t_int), _value(value) {}
 
-
+/*
+* Contrutor do tipo float.
+*
+* param value: valor da variavel.
+*/
 Float::Float(float value) : Node(Type::t_float), _value(value) {}
+
+/*
+* Contrutor do tipo boolean.
+*
+* param value: valor da variavel.
+*/
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
 
 void Declaration::setType(Type type) {
@@ -189,6 +215,11 @@ void Declaration::setType(Type type) {
 	_node->setType(type);
 }
 
+/*
+* Define o tipo da lista.
+*
+* param type: tipo da lista.
+*/
 void List::setType(Type type) {
 	Node::setType(type);
 
@@ -199,15 +230,21 @@ void List::setType(Type type) {
 	}
 }
 
+/*
+* Define o tipo da variavel.
+*
+* param type: tipo da variavel.
+*/
 void Variable::setType(Type type) {
 	Node::setType(type);
 	symbolTable.setType(_id, type);
 
+	//verifica se o tipo definido da variavel é o mesmo tipo do valor atribuido a esta variavel.
 	if(!isValueValid()) {
 		error("semantic", "attribution operation expected %s but received %s\n", 
 			Symbol::typeToString(type), 
 			Symbol::typeToString(_value->getType()));
-	} else if(_value != NULL) {
+	} else if(_value != NULL) { // ou se é passivel de coersão.
 		coercion();
 	}
 }
@@ -224,6 +261,11 @@ void Variable::coercion() {
 	}
 }
 
+/*
+* Verifica se o tipo definido da variavel é o mesmo tipo do valor atribuido a está variavel, ou se é passivel de coersão.
+*
+* return bool.
+*/
 bool Variable::isValueValid() {
 	 if(_value != NULL) { 
 	 	Type t1 = _value->getType(), t2 = getType();
@@ -239,6 +281,11 @@ bool Variable::isValueValid() {
 	 return true;
 }
 
+/*
+* Retorna o nível da arvore em que se está por blocos. podem haver condicionais e laços aninhados.
+*
+* return int.
+*/
 int Block::getLevel() { 
 	if(_parent == NULL) {
 		return 0;
@@ -247,9 +294,24 @@ int Block::getLevel() {
 	}
 }
 
+/*
+* Concatena blocos (trecho de código)
+*
+* 
+*/
 void Block::append(Block* block) {
 	_lines.push_back(block);
 	block->_parent = this;
+}
+
+/*
+* Define o bloco de um laço.
+*
+* 
+*/
+void ForLoop::setForBlock(Block* block) {
+	block->_parent = this;
+	_forBlock = block;
 }
 
 /*
@@ -363,6 +425,41 @@ void Conditional::printTree() {
 		_elseBlock->printTree();
 	}
 }
+
+/*
+* Imprime laço(for). o conteudo de um laço é um bloco.
+*
+*/
+void ForLoop::printTree() {
+	int level = getLevel();
+
+	if(level > 0) {
+		level--;
+	}
+
+	std::string tab = std::string(level*2, ' ');
+
+	std::cout << tab << "for: ";
+
+	if(_initialization != NULL) {
+		_initialization->printTree();
+	}
+	std::cout << ", ";
+
+	_test->printTree();
+	std::cout << ", ";
+
+	if(_iteration != NULL) {
+		_iteration->printTree();
+	}
+	std::cout << std::endl;
+
+	std::cout << tab << "do: " << std::endl;
+	if(_forBlock != NULL) {
+		_forBlock->printTree();
+	}
+}
+
 
 /*
 * Imprime e retorna a string de cada operação.
