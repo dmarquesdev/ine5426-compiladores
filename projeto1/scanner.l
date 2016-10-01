@@ -12,12 +12,14 @@ void error(const char* type, const char* s, ...);
 
 %option noyywrap nodefault yylineno
 
+spaces [ \t]
 integer [0-9]+
 var_name [a-zA-Z]([a-zA-Z0-9_])*
+not_valid ([^a-zA-Z0-9][^]|[ \t][^ ]|[\_][^ ]|[\+][^ ]|[\-][^ ]|[\/][^ ]|[\(][^ ]|[\)][^ ]|[\=][^ ]|[\,][^ ])+
 
 %%
 
-[ \t]               ; //ignores spaces
+{spaces}               ; //ignores spaces
 {integer}           {yylval.ival = std::atoi(yytext); return T_INT;}
 "int"				{return T_TYPE;}
 \+                 	{return T_PLUS;}

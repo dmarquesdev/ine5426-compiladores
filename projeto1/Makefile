@@ -21,4 +21,4 @@ clean:
 	rm parser.cpp parser.h scanner.cpp ${OUTPUT}
 
 test: all
-	./${OUTPUT} < 3.in
+	./tests.sh all
