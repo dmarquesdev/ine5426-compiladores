@@ -37,6 +37,7 @@ cast \[{type}\]
 "if"				{return T_IF;}
 "then"				{return T_THEN;}
 "else"				{return T_ELSE;}
+"for"				{return T_FOR;}
 
 \{					{return T_OPEN_CBRACK;}
 \}					{return T_CLOSE_CBRACK;}

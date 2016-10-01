@@ -101,6 +101,19 @@ Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) :
 	}
 }
 
+ForLoop::ForLoop(Node* initialization, Node* test, 
+	Node* iteration, Block* forBlock) : 
+	_initialization(initialization), _test(test), _iteration(iteration), 
+	_forBlock(forBlock) {
+
+	_forBlock->_parent = this;
+
+	if(_test->getType() != Type::t_bool) {
+		error("semantic", "for loop test operation expected boolean but received %s", 
+			Symbol::typeToString(_test->getType()));
+	}
+}
+
 Integer::Integer(int value) : Node(Type::t_int), _value(value) {}
 Float::Float(float value) : Node(Type::t_float), _value(value) {}
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
@@ -245,6 +258,27 @@ void Conditional::printTree() {
 		std::cout << "\n" << tab << "else: " << std::endl;
 		_elseBlock->printTree();
 	}
+}
+
+void ForLoop::printTree() {
+	int level = getLevel();
+
+	if(level > 0) {
+		level--;
+	}
+
+	std::string tab = std::string(level*2, ' ');
+
+	std::cout << tab << "for: ";
+	_initialization->printTree();
+	std::cout << ", ";
+	_test->printTree();
+	std::cout << ", ";
+	_iteration->printTree();
+	std::cout << std::endl;
+
+	std::cout << tab << "do: " << std::endl;
+	_forBlock->printTree();
 }
 
 const char* Node::operationToString(Operation op) {

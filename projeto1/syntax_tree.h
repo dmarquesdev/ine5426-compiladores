@@ -19,10 +19,6 @@ namespace SyntaxTree
 
 	enum UniOperation { negative, negation, casting };
 
-	enum Reserved { w_if, w_then, w_else };
-
-	enum Delimiter { open_curly_bracket, close_curly_bracket };
-
 	class Node;
 
 	typedef std::vector<Node*> NodeList;
@@ -95,6 +91,17 @@ namespace SyntaxTree
 		Block* _elseBlock;
 		Conditional(Node* condition, 
 			Block* ifBlock, Block* elseBlock);
+		void printTree();
+	};
+
+	class ForLoop : public Block {
+	public:
+		Node* _initialization;
+		Node* _test;
+		Node* _iteration;
+		Block* _forBlock;
+		ForLoop(Node* initialization, Node* test, 
+			Node* iteration, Block* forBlock);
 		void printTree();
 	};
 
