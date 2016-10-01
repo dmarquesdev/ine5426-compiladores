@@ -99,10 +99,13 @@ namespace SyntaxTree
 		Node* _initialization;
 		Node* _test;
 		Node* _iteration;
-		Block* _forBlock;
 		ForLoop(Node* initialization, Node* test, 
-			Node* iteration, Block* forBlock);
+			Node* iteration);
 		void printTree();
+		void setForBlock(Block* block);
+		Block* getForBlock() { return _forBlock; }
+	private:
+		Block* _forBlock;
 	};
 
 	class UnaryOp : public Node {

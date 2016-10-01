@@ -39,6 +39,7 @@ extern void error(const char* type, const char* s, ...);
     SyntaxTree::Node* node;
     SyntaxTree::Block* block;
     SymTbl::Type type;
+    SyntaxTree::ForLoop* floop;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -67,6 +68,7 @@ T_FOR
 %type <node> expr line attr exprValue 
 varDecl varList var 
 %type <block> program lines conditional forLoop
+%type <floop> forParams
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -169,14 +171,14 @@ conditional:
     ;
 
 forLoop:
-    T_FOR forParams T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK
+    T_FOR forParams T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK { $2->setForBlock($5); $$ = $2; }
+    | T_FOR forParams T_OPEN_CBRACK T_NL T_CLOSE_CBRACK { $$ = $2; }
     ;
 
 forParams:
-    T_TYPE attr T_COMMA expr T_COMMA attr
-    | attr T_COMMA expr T_COMMA attr
-    | attr T_COMMA expr T_COMMA
-    | T_COMMA expr T_COMMA attr
-    | T_COMMA expr T_COMMA
+    attr T_COMMA expr T_COMMA attr { $$ = new SyntaxTree::ForLoop($1, $3, $5); }
+    | attr T_COMMA expr T_COMMA { $$ = new SyntaxTree::ForLoop($1, $3, NULL); }
+    | T_COMMA expr T_COMMA attr { $$ = new SyntaxTree::ForLoop(NULL, $2, $4); }
+    | T_COMMA expr T_COMMA { $$ = new SyntaxTree::ForLoop(NULL, $2, NULL); }
     ;
 %%
