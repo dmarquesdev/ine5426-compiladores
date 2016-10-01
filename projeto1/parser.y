@@ -9,8 +9,8 @@
 #include "symbol_table.h"
 #include "syntax_tree.h"
 
-SymTbl::SymbolTable symbolTable;
 SyntaxTree::Block* programRoot;
+SymTbl::SymbolTable symbolTable;
 
 typedef SymTbl::Symbol Symbol;
 
@@ -102,7 +102,7 @@ lines:
     | lines line { if($2 != NULL) $$->_lines.push_back($2); }
     | conditional 
     | lines conditional { $$->append($2); }
-    | forLoop
+    | forLoop 
     | lines forLoop { $$->append($2); }
     ;
 
@@ -164,10 +164,15 @@ exprValue:
     ;
 
 conditional:
-    T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK { $$ = new SyntaxTree::Conditional($2, $7, NULL); }
+    T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK {
+        $$ = new SyntaxTree::Conditional($2, $7, NULL); 
+    }
+
     | T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines 
         T_CLOSE_CBRACK T_ELSE T_OPEN_CBRACK T_NL lines 
-        T_CLOSE_CBRACK { $$ = new SyntaxTree::Conditional($2, $7, $12); }
+        T_CLOSE_CBRACK { 
+        $$ = new SyntaxTree::Conditional($2, $7, $12); 
+    }
     ;
 
 forLoop:

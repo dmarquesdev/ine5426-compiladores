@@ -9,7 +9,7 @@ extern SymbolTable symbolTable;
 SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* value) {
 	Symbol symbol(Type::unknown, k_var, (value != NULL));
 
-	if (!contains(id)) {
+	if (!contains(id, true)) {
 		symbolList[id] = symbol;
 	} else {
 		error("semantic", "re-declaration of variable %s\n", id.c_str());
@@ -26,7 +26,6 @@ SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* val
  */
 SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
 	if(!contains(id)) { error("semantic", "undeclared variable %s\n", id.c_str()); }
-	// if(!symbolList[id]._initialized) { yyerror("Variable not initialized yet! %s\n", id.c_str()); }
 
 	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
 }
@@ -42,6 +41,19 @@ SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
 	symbolList[id]._initialized = true;
 
 	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
+}
+
+bool SymbolTable::contains(std::string id, bool local) {
+	SymbolTable* current = this;
+
+	do {
+		if(current->symbolList.find(id) != current->symbolList.end()) {
+			return true;
+		}
+		current = current->_parent;
+	} while (current != NULL && !local);
+
+	return false;
 }
 
 const char* Symbol::typeToString(Type type) {

@@ -9,7 +9,10 @@ extern void error(const char* type, const char* msg, ...);
 
 namespace SymTbl {
 	enum class Type;
+	class SymbolTable;
 }
+
+extern SymTbl::SymbolTable symbolTable;
 
 namespace SyntaxTree
 {
@@ -24,6 +27,7 @@ namespace SyntaxTree
 	typedef std::vector<Node*> NodeList;
 
 	typedef SymTbl::Type Type;
+	typedef SymTbl::SymbolTable SymbolTable;
 
 	class Node {
 	public:
@@ -78,7 +82,12 @@ namespace SyntaxTree
 	public:
 		NodeList _lines;
 		Block* _parent;
-		Block() {}
+		SymbolTable* _symbolTable;
+
+		Block() : _symbolTable(&symbolTable) {}
+		Block(SymbolTable* symbolTable) : 
+			_symbolTable(symbolTable) {}
+
 		virtual void printTree();
 		int getLevel();
 		void append(Block* block);

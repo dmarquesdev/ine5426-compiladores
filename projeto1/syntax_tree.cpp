@@ -90,9 +90,12 @@ Declaration::Declaration(Type type, Node* node) : Node(type) {
 
 Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) : 
 	_condition(condition), _ifBlock(ifBlock), _elseBlock(elseBlock) {
+
 	_ifBlock->_parent = this;
+	_ifBlock->_symbolTable = new SymbolTable(_symbolTable);
 	if(_elseBlock != NULL) {
 		_elseBlock->_parent = this;
+		_elseBlock->_symbolTable = new SymbolTable(_symbolTable);
 	}
 
 	if(_condition->getType() != Type::t_bool) {
@@ -179,6 +182,7 @@ void Block::append(Block* block) {
 void ForLoop::setForBlock(Block* block) {
 	block->_parent = this;
 	_forBlock = block;
+	_forBlock->_symbolTable = new SymbolTable(_symbolTable);
 }
 
 void Variable::printTree() {
