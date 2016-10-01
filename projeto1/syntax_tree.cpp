@@ -14,17 +14,17 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 	_right = right;
 	_op = op;
 
-	if(op == greater || op == less 
-		|| op == greater_equal || op == less_equal 
-		|| op == bool_and || op == bool_or) {
-		setType(Type::t_bool);
-	}
-
 	if(!isValid(left, right, op)) {
 		error("semantic", "%s operation expected %s but received %s\n", 
 			Node::operationToString(op), 
 			Symbol::typeToString(left->getType()), 
 			Symbol::typeToString(right->getType()));
+	}
+
+	if(op == greater || op == less 
+		|| op == greater_equal || op == less_equal 
+		|| op == bool_and || op == bool_or) {
+		setType(Type::t_bool);
 	}
 }
 
