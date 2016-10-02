@@ -5,7 +5,7 @@
 
 using namespace SyntaxTree;
 
-extern SymTbl::SymbolTable symbolTable;
+extern SymTbl::SymbolTable* symbolTable;
 
 typedef SymTbl::Symbol Symbol;
 
@@ -57,7 +57,7 @@ bool BinaryOp::isValid() {
 bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
 	coercion(n1, n2);
 
-	Type t1 = n1->getType(), t2 = n2->getType();
+	Type t1 = _left->getType(), t2 = _right->getType();
 	
 	//verifica os tipos permitidos por cada operador binario, 
 	//caso os tipos dos operando não satisfaçam o operador retorna falso.
@@ -161,9 +161,12 @@ Declaration::Declaration(Type type, Node* node) : Node(type) {
 */
 Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) : 
 	_condition(condition), _ifBlock(ifBlock), _elseBlock(elseBlock) {
+
 	_ifBlock->_parent = this;
+	_ifBlock->_symbolTable = new SymbolTable(_symbolTable);
 	if(_elseBlock != NULL) {
 		_elseBlock->_parent = this;
+		_elseBlock->_symbolTable = new SymbolTable(_symbolTable);
 	}
 
 	if(_condition->getType() != Type::t_bool) {
@@ -237,7 +240,8 @@ void List::setType(Type type) {
 */
 void Variable::setType(Type type) {
 	Node::setType(type);
-	symbolTable.setType(_id, type);
+
+	symbolTable->setType(_id, type);
 
 	//verifica se o tipo definido da variavel é o mesmo tipo do valor atribuido a esta variavel.
 	if(!isValueValid()) {
@@ -312,6 +316,7 @@ void Block::append(Block* block) {
 void ForLoop::setForBlock(Block* block) {
 	block->_parent = this;
 	_forBlock = block;
+	_forBlock->_symbolTable = new SymbolTable(_symbolTable);
 }
 
 /*

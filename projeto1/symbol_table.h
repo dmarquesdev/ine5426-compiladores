@@ -34,12 +34,16 @@ namespace SymTbl
 	class SymbolTable {
 	public:
 		SymbolTable() {}
+		SymbolTable(SymbolTable* parent) : _parent(parent) {}
 		SymbolList symbolList;
+		SymbolTable* _parent;
+
 		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* value);
 		SyntaxTree::Node* useVariable(std::string id);
 		SyntaxTree::Node* assignVariable(std::string id);
-		void setType(std::string id, Type type) { symbolList[id]._type = type; }
-		bool contains(std::string id) {return symbolList.find(id) != symbolList.end(); }
+		void setType(std::string id, Type type);
+		Symbol* find(std::string id, bool local = false);
+		SymbolTable* getParent() { return (_parent == NULL) ? this : _parent; }
 	};
 }
 

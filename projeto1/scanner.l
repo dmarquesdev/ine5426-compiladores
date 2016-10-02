@@ -62,7 +62,7 @@ cast \[{type}\]
 "|"					{return T_BOOL_OR;}
 
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
-.                   {error("lexical", "unknown symbol %c\n", *yytext);} /*complains about every unknown character*/
+.                   {error("lexical", "unknown symbol %s\n", yytext);} /*complains about every unknown character*/
 
 %%
 
