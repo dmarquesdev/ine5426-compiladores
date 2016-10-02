@@ -4,12 +4,12 @@
 
 using namespace SymTbl;
 
-extern SymbolTable symbolTable;
-
 SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* value) {
 	Symbol symbol(Type::unknown, k_var, (value != NULL));
 
-	if (!contains(id, true)) {
+	Symbol* symb = find(id, true);
+
+	if (symb == NULL) {
 		symbolList[id] = symbol;
 	} else {
 		error("semantic", "re-declaration of variable %s\n", id.c_str());
@@ -25,9 +25,10 @@ SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* val
  * It returns a Syntax Tree's variable
  */
 SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
-	if(!contains(id)) { error("semantic", "undeclared variable %s\n", id.c_str()); }
+	Symbol* symb = find(id);
+	if(symb == NULL) { error("semantic", "undeclared variable %s\n", id.c_str()); }
 
-	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
+	return new SyntaxTree::Variable(id, symb->_type, NULL);
 }
 
 /* 
@@ -37,23 +38,33 @@ SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
  * It returns a Syntax Tree's variable
  */
 SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
-	if(!contains(id)) { error("semantic", "undeclared variable %s\n", id.c_str()); }
-	symbolList[id]._initialized = true;
+	Symbol* symb = find(id);
+	if(symb == NULL) { error("semantic", "undeclared variable %s\n", id.c_str()); }
+	symb->_initialized = true;
 
-	return new SyntaxTree::Variable(id, symbolList[id]._type, NULL);
+	return new SyntaxTree::Variable(id, symb->_type, NULL);
 }
 
-bool SymbolTable::contains(std::string id, bool local) {
+Symbol* SymbolTable::find(std::string id, bool local) {
 	SymbolTable* current = this;
 
 	do {
-		if(current->symbolList.find(id) != current->symbolList.end()) {
-			return true;
+		SymbolList sl = current->symbolList;
+		auto result = sl.find(id);
+
+		if(result != sl.end()) {
+			return &result->second;
 		}
 		current = current->_parent;
 	} while (current != NULL && !local);
 
-	return false;
+	return NULL;
+}
+
+void SymbolTable::setType(std::string id, Type type) {
+	if(find(id) != NULL) {
+		symbolList[id]._type = type;
+	}
 }
 
 const char* Symbol::typeToString(Type type) {

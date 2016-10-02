@@ -5,7 +5,7 @@
 
 using namespace SyntaxTree;
 
-extern SymTbl::SymbolTable symbolTable;
+extern SymTbl::SymbolTable* symbolTable;
 
 typedef SymTbl::Symbol Symbol;
 
@@ -28,14 +28,10 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 	}
 }
 
-bool BinaryOp::isValid() {
-	return isValid(_left, _right, _op);
-}
-
 bool BinaryOp::isValid(Node* n1, Node* n2, Operation op) {
 	coercion(n1, n2);
 
-	Type t1 = n1->getType(), t2 = n2->getType();
+	Type t1 = _left->getType(), t2 = _right->getType();
 	
 	if(op == plus || op == minus || op == times || 
 		op == division || op == greater || op == less 
@@ -134,7 +130,8 @@ void List::setType(Type type) {
 
 void Variable::setType(Type type) {
 	Node::setType(type);
-	symbolTable.setType(_id, type);
+
+	symbolTable->setType(_id, type);
 
 	if(!isValueValid()) {
 		error("semantic", "attribution operation expected %s but received %s\n", 

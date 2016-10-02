@@ -10,7 +10,8 @@
 #include "syntax_tree.h"
 
 SyntaxTree::Block* programRoot;
-SymTbl::SymbolTable symbolTable;
+
+SymTbl::SymbolTable* symbolTable;
 
 typedef SymTbl::Symbol Symbol;
 
@@ -67,7 +68,7 @@ T_FOR
  */
 %type <node> expr line attr exprValue 
 varDecl varList var 
-%type <block> program lines conditional forLoop
+%type <block> program block lines conditional forLoop
 %type <floop> forParams
 
 /* Operator precedence for mathematical operators
@@ -90,8 +91,12 @@ varDecl varList var
 %%
 
 program: 
-    lines { programRoot = $1; } /* Start program root block with all lines */
+    block { programRoot = $1; } /* Start program root block with all lines */
     ;
+
+block:
+    { symbolTable = new SymTbl::SymbolTable(symbolTable); } 
+    lines { symbolTable = symbolTable->getParent(); $$ = $2; }
 
 lines: 
     /* Declares a new code block for that line and if line contains something, add it
@@ -123,19 +128,14 @@ varList:
     ;
 
 var:
-    T_VAR_NAME { $$ = symbolTable.newVariable($1, NULL); }
-    | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable.newVariable($1, $3); }
+    T_VAR_NAME { $$ = symbolTable->newVariable($1, NULL); }
+    | T_VAR_NAME T_ATTRIB expr { $$ = symbolTable->newVariable($1, $3); }
     ;
 
 attr:
-    T_VAR_NAME T_ATTRIB expr { SyntaxTree::Node* node = symbolTable.assignVariable($1);
+    T_VAR_NAME T_ATTRIB expr { SyntaxTree::Node* node = symbolTable->assignVariable($1);
             $$ = new SyntaxTree::BinaryOp(node, SyntaxTree::assign, $3); }
 
-/* The expression grammar uses "stratified grammar" to
- * avoid ambiguity
- * https://courses.engr.illinois.edu/cs421/sp2010/lectures/lecture10.pdf
- * Page 9
- */
 expr:
     expr T_TIMES expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::times, $3); }
     | expr T_DIV expr { $$ = new SyntaxTree::BinaryOp($1, SyntaxTree::division, $3); }
@@ -160,23 +160,23 @@ exprValue:
     T_INT { $$ = new SyntaxTree::Integer($1); }
     | T_FLOAT { $$ = new SyntaxTree::Float($1); }
     | T_BOOL { $$ = new SyntaxTree::Boolean($1); }
-    | T_VAR_NAME { $$ = symbolTable.useVariable($1); }
+    | T_VAR_NAME { $$ = symbolTable->useVariable($1); }
     ;
 
 conditional:
-    T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK {
+    T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL block T_CLOSE_CBRACK {
         $$ = new SyntaxTree::Conditional($2, $7, NULL); 
     }
 
-    | T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL lines 
-        T_CLOSE_CBRACK T_ELSE T_OPEN_CBRACK T_NL lines 
+    | T_IF expr T_NL T_THEN T_OPEN_CBRACK T_NL block 
+        T_CLOSE_CBRACK T_ELSE T_OPEN_CBRACK T_NL block 
         T_CLOSE_CBRACK { 
         $$ = new SyntaxTree::Conditional($2, $7, $12); 
     }
     ;
 
 forLoop:
-    T_FOR forParams T_OPEN_CBRACK T_NL lines T_CLOSE_CBRACK { $2->setForBlock($5); $$ = $2; }
+    T_FOR forParams T_OPEN_CBRACK T_NL block T_CLOSE_CBRACK { $2->setForBlock($5); $$ = $2; }
     | T_FOR forParams T_OPEN_CBRACK T_NL T_CLOSE_CBRACK { $$ = $2; }
     ;
 
