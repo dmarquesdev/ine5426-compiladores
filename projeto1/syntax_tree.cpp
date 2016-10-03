@@ -40,15 +40,6 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 /*
 * Verifica se a operação binaria é valida.
 *
-* Retorna um boolean
-*/
-bool BinaryOp::isValid() {
-	return isValid(_left, _right, _op);
-}
-
-/*
-* Verifica se a operação binaria é valida.
-*
 * param n1: nodo da arvore, equivale ao operando definido a esquerda da operação binária.
 * param n2: nodo da arvore, equiva ao operando definido a direita da operação binária.
 * param op: equivale ao operador da operação binária.
@@ -212,6 +203,20 @@ Float::Float(float value) : Node(Type::t_float), _value(value) {}
 */
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
 
+Function::Function(std::string id, Type type, List* parameters, 
+	Block* body, Node* returnValue) {
+	_id = id; 
+	_parameters = parameters;
+	_body = body;
+	_returnValue = returnValue;
+	setType(type);
+}
+
+FunctionCall::FunctionCall(std::string id, List* parameters) {
+	_id = id;
+	_parameters = parameters;
+}
+
 void Declaration::setType(Type type) {
 	Node::setType(type);
 
@@ -317,6 +322,26 @@ void ForLoop::setForBlock(Block* block) {
 	block->_parent = this;
 	_forBlock = block;
 	_forBlock->_symbolTable = new SymbolTable(_symbolTable);
+}
+
+TypeList* List::getTypeList() {
+	List* current = this;
+	while(current != NULL) {
+		_typeList.push_back(current->getType());
+	}
+
+	return &_typeList;
+}
+
+int List::getSize() {
+	int counter = 0;
+
+	List* current = this;
+	while(current != NULL) {
+		counter++;
+	}
+
+	return counter;
 }
 
 /*
@@ -465,6 +490,37 @@ void ForLoop::printTree() {
 	}
 }
 
+void Function::printTree() {
+	if(_returnValue != NULL) {
+		std::cout << Symbol::typeToString(getType())
+		<< " fun: " << _id
+		<< " (params: ";
+
+		if(_parameters != NULL) {
+			_parameters->printTree();
+		}
+
+		std::cout << ")" << std::endl;
+		if(_body != NULL) {
+			_body->printTree();
+		}
+
+		std::cout << "  ret ";
+		_returnValue->printTree();
+		std::cout << std::endl;
+	}
+}
+
+void FunctionCall::printTree() {
+	int size = 0;
+
+	if(_parameters != NULL) {
+		size = _parameters->getSize();
+	}
+
+	std::cout << _id 
+	<< "[" << size << " params] ";
+}
 
 /*
 * Imprime e retorna a string de cada operação.

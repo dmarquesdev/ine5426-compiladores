@@ -28,6 +28,7 @@ namespace SyntaxTree
 
 	typedef SymTbl::Type Type;
 	typedef SymTbl::SymbolTable SymbolTable;
+	typedef std::vector<Type> TypeList;
 
 	static SymbolTable* CURRENT_ST;
 
@@ -53,6 +54,10 @@ namespace SyntaxTree
 		void printTree();
 		List(Node* node, Node* next);
 		virtual void setType(Type type);
+		TypeList* getTypeList();
+		int getSize();
+	private:
+		TypeList _typeList;
 	};
 
 	class Variable : public Node {
@@ -116,6 +121,24 @@ namespace SyntaxTree
 		Block* getForBlock() { return _forBlock; }
 	private:
 		Block* _forBlock;
+	};
+
+	class Function : public Block {
+	public:
+		std::string _id;
+		List* _parameters;
+		Block* _body;
+		Node* _returnValue;
+		Function(std::string id, Type type, List* parameters, Block* body, Node* returnValue);
+		void printTree();
+	};
+
+	class FunctionCall : public Node {
+	public:
+		std::string _id;
+		List* _parameters;
+		FunctionCall(std::string id, List* parameters);
+		void printTree();
 	};
 
 	class UnaryOp : public Node {
