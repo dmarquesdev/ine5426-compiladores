@@ -42,6 +42,7 @@ namespace SyntaxTree
 		virtual void setType(Type type) { _type = type; }
 		Type getType() { return _type; }
 		static const char* operationToString(Operation op);
+		static const char* operationNameToString(Operation op);
 	private:
 		Type _type;
 	};
