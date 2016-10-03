@@ -42,6 +42,7 @@ extern void error(const char* type, const char* s, ...);
     SymTbl::Type type;
     SyntaxTree::ForLoop* floop;
     SyntaxTree::List* list;
+    SyntaxTree::Variable* var;
 }
 
 /* token defines our terminal symbols (tokens).
@@ -68,12 +69,13 @@ T_FOR T_FUNC T_RETURN
  * Example: %type<node> expr
  */
 %type <node> expr line attr exprValue 
-varDecl varList var funcCall 
+varDecl funcCall funcDecl
 %type <block> program block lines conditional 
-forLoop funcDecl
+forLoop funcDef
 %type <floop> forParams
 %type <list> funcCallParamsList funcCallParams 
-funcDeclParamsList funcDeclParams
+funcDeclParamsList funcDeclParams varList
+%type <var> var
 
 /* Operator precedence for mathematical operators
  * The latest it is listed, the highest the precedence
@@ -100,7 +102,7 @@ program:
 
 block:
     { symbolTable = new SymTbl::SymbolTable(symbolTable); } 
-    lines { symbolTable = symbolTable->getParent(); $$ = $2; }
+    lines { symbolTable = symbolTable->endScope(); $$ = $2; }
 
 lines: 
     /* Declares a new code block for that line and if line contains something, add it
@@ -113,8 +115,8 @@ lines:
     | lines conditional { $$->append($2); }
     | forLoop 
     | lines forLoop { $$->append($2); }
-    | funcDecl 
-    | lines funcDecl { $$->append($2); }
+    | funcDef 
+    | lines funcDef { $$->append($2); }
     ;
 
 line: 
@@ -122,11 +124,12 @@ line:
     | varDecl T_NL /* Variable declaration */
     | attr T_NL 
     | funcCall T_NL
+    | funcDecl T_NL 
     ;
 
 
 varDecl:
-    T_TYPE varList { $$ = new SyntaxTree::Declaration($1, $2); }
+    T_TYPE varList { $$ = new SyntaxTree::VariableDeclaration($1, $2); }
     ;
 
 varList:
@@ -197,16 +200,25 @@ forParams:
 
 funcDecl:
     T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR {
-        $$ = symbolTable->newFunction($3, $1, $5, NULL, NULL);
+        $$ = symbolTable->declareFunction($3, $1, $5);
     }
-    | T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR 
+    ;
+
+funcDef:
+    T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR 
         T_OPEN_CBRACK T_NL T_RETURN expr T_NL T_CLOSE_CBRACK {
-        $$ = symbolTable->newFunction($3, $1, $5, NULL, $10);
+        $$ = symbolTable->defineFunction($3, $1, $5, NULL, $10);
     }
     | T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR 
-        T_OPEN_CBRACK T_NL block T_RETURN expr T_NL T_CLOSE_CBRACK {
-        $$ = symbolTable->newFunction($3, $1, $5, $9, $11);
-    }
+        T_OPEN_CBRACK T_NL 
+        { 
+            symbolTable = new SymTbl::SymbolTable(symbolTable); 
+            symbolTable->addParameters($5);
+        }
+        lines T_RETURN expr T_NL T_CLOSE_CBRACK {
+            symbolTable = symbolTable->endScope();
+            $$ = symbolTable->defineFunction($3, $1, $5, $10, $12);
+        }
     ;
 
 funcDeclParams:

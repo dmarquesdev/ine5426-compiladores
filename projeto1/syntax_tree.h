@@ -47,19 +47,6 @@ namespace SyntaxTree
 		Type _type;
 	};
 
-	class List : public Node {
-	public:
-		Node* _node;
-		Node* _next;
-		void printTree();
-		List(Node* node, Node* next);
-		virtual void setType(Type type);
-		TypeList* getTypeList();
-		int getSize();
-	private:
-		TypeList _typeList;
-	};
-
 	class Variable : public Node {
 	public:
 		std::string _id;
@@ -70,6 +57,19 @@ namespace SyntaxTree
 		bool isValueValid();
 	private:
 		void coercion();
+	};
+
+	class VariableList : public Node {
+	public:
+		Variable* _node;
+		VariableList* _next;
+		void printTree();
+		VariableList(Variable* node, VariableList* next);
+		virtual void setType(Type type);
+		TypeList* getTypeList();
+		int getSize();
+	private:
+		TypeList _typeList;
 	};
 
 	class BinaryOp : public Node {
@@ -123,13 +123,20 @@ namespace SyntaxTree
 		Block* _forBlock;
 	};
 
-	class Function : public Block {
+	class FunctionDeclaration : public Node {
 	public:
 		std::string _id;
 		List* _parameters;
+		FunctionDeclaration(std::string id, Type type, List* parameters);
+		void printTree();
+	};
+
+	class Function : public Block {
+	public:
+		FunctionDeclaration* _declaration;
 		Block* _body;
 		Node* _returnValue;
-		Function(std::string id, Type type, List* parameters, Block* body, Node* returnValue);
+		Function(FunctionDeclaration* declaration, Block* body, Node* returnValue);
 		void printTree();
 	};
 
@@ -155,10 +162,10 @@ namespace SyntaxTree
 		void printTree();
 	};
 
-	class Declaration : public Node {
+	class VariableDeclaration : public Node {
 	public:
-		Node* _node;
-		Declaration(Type type, Node* node);
+		VariableList* _node;
+		VariableDeclaration(Type type, VariableList* node);
 		void printTree();
 		virtual void setType(Type type);
 	};

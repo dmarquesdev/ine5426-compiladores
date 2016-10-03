@@ -105,7 +105,7 @@ Variable::Variable(std::string id, Type type, Node* value) : Node(type) {
 * param node: nodo da árvore 
 * param next: nodo da árvore, proximo nodo da lista.
 */
-List::List(Node* node, Node* next) : Node(node->getType()) {
+List::List(Variable* node, List* next) : Node(node->getType()) {
 	_node = node;
 	_next = next;
 }
@@ -137,7 +137,7 @@ Cast::Cast(Type type, Node* node) : UnaryOp(node, casting) {
 * param type: tipo da variavel
 * param node: nodo da árvore com a veriavel.
 */
-Declaration::Declaration(Type type, Node* node) : Node(type) {
+VariableDeclaration::VariableDeclaration(Type type, List* node) : Node(type) {
 	_node = node;
 	setType(type);
 }
@@ -203,13 +203,24 @@ Float::Float(float value) : Node(Type::t_float), _value(value) {}
 */
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
 
-Function::Function(std::string id, Type type, List* parameters, 
-	Block* body, Node* returnValue) {
-	_id = id; 
+FunctionDeclaration::FunctionDeclaration(std::string id, Type type, 
+	List* parameters) : Node(type) {
+	_id = id;
 	_parameters = parameters;
+}
+
+Function::Function(FunctionDeclaration* declaration, 
+	Block* body, Node* returnValue) {
+	_declaration = declaration;
 	_body = body;
 	_returnValue = returnValue;
-	setType(type);
+
+	setType(declaration->getType());
+
+	if(_body != NULL) {
+		_body->_parent = this;
+		_body->_symbolTable = new SymbolTable(_symbolTable);
+	}
 }
 
 FunctionCall::FunctionCall(std::string id, List* parameters) {
@@ -217,7 +228,7 @@ FunctionCall::FunctionCall(std::string id, List* parameters) {
 	_parameters = parameters;
 }
 
-void Declaration::setType(Type type) {
+void VariableDeclaration::setType(Type type) {
 	Node::setType(type);
 
 	_node->setType(type);
@@ -328,6 +339,8 @@ TypeList* List::getTypeList() {
 	List* current = this;
 	while(current != NULL) {
 		_typeList.push_back(current->getType());
+
+		current = current->_next;
 	}
 
 	return &_typeList;
@@ -339,6 +352,8 @@ int List::getSize() {
 	List* current = this;
 	while(current != NULL) {
 		counter++;
+
+		current = current->_next;
 	}
 
 	return counter;
@@ -416,7 +431,7 @@ void UnaryOp::printTree() {
 /*
 * Imprime a declaração de variaveis.
 */
-void Declaration::printTree() {
+void VariableDeclaration::printTree() {
 	std::cout << Symbol::typeToString(getType()) << " ";
 	std::cout << "var: ";
 	_node->printTree();
@@ -490,25 +505,28 @@ void ForLoop::printTree() {
 	}
 }
 
+void FunctionDeclaration::printTree() {
+
+}
+
 void Function::printTree() {
-	if(_returnValue != NULL) {
-		std::cout << Symbol::typeToString(getType())
-		<< " fun: " << _id
-		<< " (params: ";
+	std::cout << Symbol::typeToString(_declaration->getType())
+	<< " fun: " << _declaration->_id
+	<< " (params: ";
 
-		if(_parameters != NULL) {
-			_parameters->printTree();
-		}
-
-		std::cout << ")" << std::endl;
-		if(_body != NULL) {
-			_body->printTree();
-		}
-
-		std::cout << "  ret ";
-		_returnValue->printTree();
-		std::cout << std::endl;
+	if(_declaration->_parameters != NULL) {
+		_declaration->_parameters->printTree();
 	}
+
+	std::cout << ")" << std::endl;
+
+	if(_body != NULL) {
+		_body->printTree();
+	}
+
+	std::cout << "  ret ";
+	_returnValue->printTree();
+	std::cout << std::endl;
 }
 
 void FunctionCall::printTree() {

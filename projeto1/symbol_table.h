@@ -43,20 +43,29 @@ namespace SymTbl
 		SymbolList symbolList;
 		SymbolTable* _parent;
 
-		SyntaxTree::Node* newVariable(std::string id, SyntaxTree::Node* value);
+		SyntaxTree::Variable* newVariable(std::string id, SyntaxTree::Node* value);
 		SyntaxTree::Node* useVariable(std::string id);
 		SyntaxTree::Node* assignVariable(std::string id);
 
 
-		SyntaxTree::Block* newFunction(std::string id, Type type, 
-			SyntaxTree::List* params, SyntaxTree::Block* body, 
+		SyntaxTree::Node* declareFunction(std::string id, Type type, 
+			SyntaxTree::List* params);
+
+		SyntaxTree::Block* defineFunction(std::string id, Type type, 
+			SyntaxTree::List* params,  
+			SyntaxTree::Block* body, 
 			SyntaxTree::Node* returnValue);
 
 		SyntaxTree::Node* callFunction(std::string id, SyntaxTree::List* params);
 
 		void setType(std::string id, Type type);
 		Symbol* find(std::string id, Kind kind = k_var, TypeList* typeList = NULL, bool local = false);
-		SymbolTable* getParent() { return (_parent == NULL) ? this : _parent; }
+		SymbolTable* endScope();
+		void addParameters(SyntaxTree::List* params);
+
+	private:
+		void checkUndefinedFunction();
+		void checkParameters(std::string id, TypeList* symbolTL, TypeList* callTL);
 	};
 }
 
