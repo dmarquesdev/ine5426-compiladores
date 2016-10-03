@@ -4,7 +4,7 @@
 
 using namespace SymTbl;
 
-extern SymbolTable symbolTable;
+extern SymbolTable* symbolTable;
 
 /* 
  * Crate a new variable node at syntax tree 

@@ -76,6 +76,7 @@ namespace SyntaxTree
 		BinaryOp(Node* left, Operation op, Node* right);
 		void printTree();
 	private:
+		bool isValid();
 		bool isValid(Node* n1, Node* n2, Operation op);
 		void coercion(Node* n1, Node* n2);
 	};
