@@ -24,7 +24,7 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 	//verifica se os tipos dos operando satisfazem os tipos permitidos pelo operador.
 	if(!isValid(left, right, op)) {
 		error("semantic", "%s operation expected %s but received %s\n", 
-			Node::operationToString(op), 
+			Node::operationNameToString(op), 
 			Symbol::typeToString(left->getType()), 
 			Symbol::typeToString(right->getType()));
 	}
@@ -467,7 +467,7 @@ void ForLoop::printTree() {
 
 
 /*
-* Imprime e retorna a string de cada operação.
+* Retorna a string do operador de cada operação.
 *
 */
 const char* Node::operationToString(Operation op) {
@@ -485,5 +485,27 @@ const char* Node::operationToString(Operation op) {
 		case less_equal: return "<=";
 		case bool_and: return "&";
 		case bool_or: return "|";
+	}
+}
+
+/*
+* Retorna a string do nome de cada operação.
+*
+*/
+const char* Node::operationNameToString(Operation op) {
+	switch(op) {
+		case plus: return "addition";
+		case minus: return "subtraction";
+		case times: return "multiplication";
+		case division: return "division";
+		case assign: return "attribution";
+		case equals: return "equal";
+		case different: return "different";
+		case greater: return "greater than";
+		case less: return "less than";
+		case greater_equal: return "greater or equal than";
+		case less_equal: return "less or equal than";
+		case bool_and: return "and";
+		case bool_or: return "or";
 	}
 }

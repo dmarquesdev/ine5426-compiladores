@@ -23,6 +23,7 @@ boolean (true|false)
 var_name [a-zA-Z]([a-zA-Z0-9_])*
 type (int|float|bool)
 cast \[{type}\]
+not_valid [^a-zA-Z0-9\n \t\{\}\+\*\-\/\(\)\=\,\!\>\<\&\|\_]*
 
 %%
 
@@ -62,7 +63,7 @@ cast \[{type}\]
 "|"					{return T_BOOL_OR;}
 
 {var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
-.                   {error("lexical", "unknown symbol %s\n", yytext);} /*complains about every unknown character*/
+{not_valid}         {error("lexical", "unknown symbol %c\n", yytext;} /*complains about every unknown character*/
 
 %%
 
