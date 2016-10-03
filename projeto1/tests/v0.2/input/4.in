@@ -1,0 +1,5 @@
+float a, b
+bool ball = true, car = true
+
+ball = a <= b
+car = a >= b

@@ -1,0 +1,6 @@
+float a_
+if true
+then {
+	float a
+}
+float a

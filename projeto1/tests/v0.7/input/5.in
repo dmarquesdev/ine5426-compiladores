@@ -1,0 +1,8 @@
+bool fun myfunc (int y)
+
+bool fun myfunc (int y) {
+	bool resp
+}
+
+bool te
+te = myfunc ( 10 ) 

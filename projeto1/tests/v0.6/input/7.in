@@ -1,0 +1,6 @@
+int a
+if true
+then {
+	float a = 0.1
+}
+a = 234.45

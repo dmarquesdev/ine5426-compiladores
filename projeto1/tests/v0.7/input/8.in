@@ -1,0 +1,6 @@
+int a
+int fun f (int x, int y)
+a = f (0.0, 0)
+int fun f (int x, int y) {
+	ret x
+}

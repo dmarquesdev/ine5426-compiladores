@@ -1,0 +1,3 @@
+float a
+bool b
+b = a

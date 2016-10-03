@@ -1,0 +1,6 @@
+bool a
+if true 
+then {
+	int a
+}
+bool a = 0

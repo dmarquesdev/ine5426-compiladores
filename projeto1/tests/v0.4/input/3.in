@@ -1,0 +1,10 @@
+int a, b, c
+bool teste = true
+if a < b 
+then {
+	int ad = 10
+	b = c - ad
+} else {
+	b = b - c
+	teste = false
+}

@@ -1,0 +1,5 @@
+if true 
+then {
+	float a
+}
+float a

@@ -1,0 +1,6 @@
+bool b
+bool fun x (int a__)
+b = x(1, 2, 3)
+bool fun x (int a__) {
+	ret a__
+}

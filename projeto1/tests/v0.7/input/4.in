@@ -1,0 +1,13 @@
+bool fun myfunc (int y)
+
+bool fun myfunc (int y) {
+	bool resp
+	if y < 10 
+	then {
+		resp = false
+	}
+	ret resp
+}
+
+bool te
+te = myfunc ( 10 ) 

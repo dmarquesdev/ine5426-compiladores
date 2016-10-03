@@ -1,0 +1,6 @@
+if true
+then {
+	int a = 10
+}
+int b
+b = a + 54
