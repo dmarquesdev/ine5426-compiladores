@@ -26,9 +26,11 @@ namespace SymTbl
 		Kind _kind;
 		bool _initialized;
 		TypeList* _typeList;
+		unsigned int _paramsCount;
 
 		Symbol(Type type = Type::unknown, Kind kind = k_var, 
-			TypeList* typeList = NULL, bool initialized = false) :
+			TypeList* typeList = NULL, unsigned int paramsCount = 0, 
+			bool initialized = false) :
 			_type(type), _kind(kind), _typeList(typeList), 
 			_initialized(initialized) {}
 
@@ -49,7 +51,7 @@ namespace SymTbl
 
 
 		SyntaxTree::Node* declareFunction(std::string id, Type type, 
-			SyntaxTree::List* params);
+			SyntaxTree::List* params, bool declareOnly = true);
 
 		SyntaxTree::Block* defineFunction(std::string id, Type type, 
 			SyntaxTree::List* params,  
@@ -59,13 +61,17 @@ namespace SymTbl
 		SyntaxTree::Node* callFunction(std::string id, SyntaxTree::List* params);
 
 		void setType(std::string id, Type type);
-		Symbol* find(std::string id, Kind kind = k_var, TypeList* typeList = NULL, bool local = false);
+		Symbol* find(std::string id, Kind kind = k_var, 
+			TypeList* typeList = NULL, 
+			unsigned int size = 0, bool local = false);
+
 		SymbolTable* endScope();
 		void addParameters(SyntaxTree::List* params);
 
 	private:
 		void checkUndefinedFunction();
-		void checkParameters(std::string id, TypeList* symbolTL, TypeList* callTL);
+		void checkParameters(std::string id, unsigned int size, 
+			TypeList* symbolTL, TypeList* callTL);
 	};
 }
 

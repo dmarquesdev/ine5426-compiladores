@@ -206,12 +206,20 @@ funcDecl:
 
 funcDef:
     T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR 
-        T_OPEN_CBRACK T_NL T_RETURN expr T_NL T_CLOSE_CBRACK {
-        $$ = symbolTable->defineFunction($3, $1, $5, NULL, $10);
-    }
+        T_OPEN_CBRACK T_NL 
+        { 
+            symbolTable->declareFunction($3, $1, $5, false);
+            symbolTable = new SymTbl::SymbolTable(symbolTable); 
+            symbolTable->addParameters($5);
+        }
+        T_RETURN expr T_NL T_CLOSE_CBRACK {
+            symbolTable = symbolTable->endScope();
+            $$ = symbolTable->defineFunction($3, $1, $5, NULL, $11);
+        }
     | T_TYPE T_FUNC T_ID T_OPEN_PAR funcDeclParams T_CLOSE_PAR 
         T_OPEN_CBRACK T_NL 
         { 
+            symbolTable->declareFunction($3, $1, $5);
             symbolTable = new SymTbl::SymbolTable(symbolTable); 
             symbolTable->addParameters($5);
         }
@@ -229,11 +237,11 @@ funcDeclParams:
 funcDeclParamsList:
     T_TYPE T_ID { 
         SyntaxTree::Variable* var =  new SyntaxTree::Variable($2, $1, NULL); 
-        $$ = new SyntaxTree::List(var, NULL);
+        $$ = new SyntaxTree::List(var, NULL, SyntaxTree::paramDecl);
     }
     | funcDeclParamsList T_COMMA T_TYPE T_ID {
         SyntaxTree::Variable* var =  new SyntaxTree::Variable($4, $3, NULL);
-        $$ = new SyntaxTree::List(var, $1);
+        $$ = new SyntaxTree::List(var, $1, SyntaxTree::paramDecl);
     }
     ;
 
@@ -247,7 +255,7 @@ funcCallParams:
     ;
 
 funcCallParamsList:
-    expr { $$ = new SyntaxTree::List($1, NULL); }
-    | funcCallParamsList T_COMMA expr { $$ = new SyntaxTree::List($3, $1); }
+    expr { $$ = new SyntaxTree::List($1, NULL, SyntaxTree::params); }
+    | funcCallParamsList T_COMMA expr { $$ = new SyntaxTree::List($3, $1, SyntaxTree::params); }
 
 %%

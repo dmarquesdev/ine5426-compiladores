@@ -12,12 +12,12 @@ using namespace SymTbl;
  * It returns a Syntax Tree's variable
  */
 SyntaxTree::Variable* SymbolTable::newVariable(std::string id, SyntaxTree::Node* value) {
-	Symbol symbol(Type::unknown, k_var, NULL, (value != NULL));
+	Symbol* symbol = new Symbol(Type::unknown, k_var, NULL, 0, (value != NULL));
 
-	Symbol* symb = find(id, k_var, NULL, true);
+	Symbol* symb = find(id, k_var, NULL, 0, true);
 
 	if (symb == NULL) {
-		symbolList[id] = symbol;
+		symbolList[id] = *symbol;
 	} else {
 		error("semantic", "re-declaration of variable %s\n", id.c_str());
 	}
@@ -52,7 +52,9 @@ SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
 	return new SyntaxTree::Variable(id, symb->_type, NULL);
 }
 
-Symbol* SymbolTable::find(std::string id, Kind kind, TypeList* typeList, bool local) {
+Symbol* SymbolTable::find(std::string id, Kind kind, 
+	TypeList* typeList, unsigned int size, bool local) {
+
 	SymbolTable* current = this;
 
 	do {
@@ -60,8 +62,10 @@ Symbol* SymbolTable::find(std::string id, Kind kind, TypeList* typeList, bool lo
 		auto result = sl.find(id);
 
 		if(result != sl.end() && 
-			result->second._kind == kind &&
-			(typeList == NULL || typeList == result->second._typeList)) {
+			result->second._kind == kind && 
+			result->second._paramsCount == size && 
+			(typeList == NULL || 
+			 typeList == result->second._typeList)) {
 			return &result->second;
 		}
 		current = current->_parent;
@@ -77,21 +81,29 @@ void SymbolTable::setType(std::string id, Type type) {
 }
 
 SyntaxTree::Node* SymbolTable::declareFunction(std::string id, Type type, 
-	SyntaxTree::List* params) {
+	SyntaxTree::List* params, bool declareOnly) {
 
 	TypeList* tl;
+	unsigned int size = 0;
 
 	if(params != NULL) {
-		tl = params->getTypeList();
+		size = params->getSize();
 	}
 
-	Symbol symbol(type, k_func, tl, false);
-
-	Symbol* symb = find(id, k_func, tl, true);
-
-	if (symb == NULL) {
-		symbolList[id] = symbol;
+	if(params != NULL && size > 0) {
+		tl = params->getTypeList();
 	} else {
+		tl = NULL;
+	}
+
+	Symbol* symbol = new Symbol(type, k_func, tl, 0, false);
+	symbol->_paramsCount = size;
+
+	Symbol* symb = find(id, k_func, tl, size, true);
+
+	if (symb == NULL || !declareOnly) {
+		symbolList[id] = *symbol;
+	} else if (declareOnly) {
 		error("semantic", "re-definition of function %s\n", id.c_str());
 	}
 
@@ -104,19 +116,19 @@ SyntaxTree::Block* SymbolTable::defineFunction(std::string id, Type type,
 	SyntaxTree::Node* returnValue) {
 
 	TypeList* tl;
+	unsigned int size = 0;
 
 	if(params != NULL) {
+		size = params->getSize();
+	}
+
+	if(params != NULL && size > 0) {
 		tl = params->getTypeList();
+	} else {
+		tl = NULL;
 	}
 
-	Symbol* symb = find(id, k_func, tl, true);
-
-	if(symb == NULL) {
-		Symbol symbol(type, k_func, tl, false);
-
-		symbolList[id] = symbol;
-		symb = &symbol;
-	}
+	Symbol* symb = find(id, k_func, tl, size, true);
 
 	if(symb->_initialized) {
 		error("semantic", "re-definition of function %s\n", id.c_str());
@@ -124,26 +136,36 @@ SyntaxTree::Block* SymbolTable::defineFunction(std::string id, Type type,
 
 	symbolList[id]._initialized = true;
 
-	return new SyntaxTree::Function(
+	SyntaxTree::Function* result = new SyntaxTree::Function(
 		new SyntaxTree::FunctionDeclaration(id, type, params), 
 		body, returnValue);
+
+	return result;
 }
 
 SyntaxTree::Node* SymbolTable::callFunction(std::string id, SyntaxTree::List* params) {
 	TypeList* tl;
+	unsigned int size = 0;
 
 	if(params != NULL) {
-		tl = params->getTypeList();
+		size = params->getSize();
 	}
 
-	Symbol* symb = find(id, k_func, NULL, false);
+	if(params != NULL && size > 0) {
+		tl = params->getTypeList();
+	} else {
+		tl = NULL;
+	}
+
+	Symbol* symb = find(id, k_func, NULL, size, false);
 
 	if(symb == NULL) { 
 		error("semantic", "undeclared function %s\n", id.c_str()); 
-	} else if(!symb->_initialized) {
-		error("semantic", "undefined function %s\n", id.c_str());
+	} else if(size != symb->_paramsCount) {
+		error("semantic", "function %s expected %d parameters but received %d", 
+			id.c_str(), symb->_paramsCount, size);
 	} else if(tl != NULL && symb->_typeList != NULL) {
-			checkParameters(id, symb->_typeList, tl);
+		checkParameters(id, size, symb->_typeList, tl);
 	}
 
 
@@ -162,34 +184,28 @@ void SymbolTable::checkUndefinedFunction() {
 	}
 }
 
-void SymbolTable::checkParameters(std::string id, TypeList* symbolTL, TypeList* callTL) {
-	int symbolSize = symbolTL->size(), callSize = callTL->size();
+void SymbolTable::checkParameters(std::string id, unsigned int size, TypeList* symbolTL, TypeList* callTL) {
+	for(int i = 0; i < size; i++) {
+		Type symbolType = (*symbolTL)[i]; 
+		Type callType = (*callTL)[i];
 
-	if(symbolSize != callSize) {
-		error("semantic", "function %s expects %d parameters but received %d\n", 
-			id.c_str(), symbolTL->size(), callTL->size());
-	} else {
-		for(int i = 0; i < symbolTL->size(); i++) {
-			Type symbolType = (*symbolTL)[i], 
-				callType = (*callTL)[i];
-
-			if(symbolType != callType) {
-				error("semantic", "parameter %d expected %s but received %s\n", 
-					(i+1), Symbol::typeToString(symbolType), 
-					Symbol::typeToString(callType));
-			}
+		if(symbolType != callType) {
+			error("semantic", "parameter %d expected %s but received %s\n", 
+				(i+1), Symbol::typeToString(symbolType), 
+				Symbol::typeToString(callType));
 		}
 	}
 }
 
 void SymbolTable::addParameters(SyntaxTree::List* params) {
 	SyntaxTree::List* current = params;
+
 	while(current != NULL) {
-		Symbol symbol(current->getType(), k_var, NULL, true);
+		Symbol* symbol = new Symbol(current->getType(), k_var, NULL, 0, true);
 
-		SyntaxTree::Variable* var = current->_node;
+		SyntaxTree::Variable* var = dynamic_cast<SyntaxTree::Variable*>(current->_node);
 
-		symbolList[var->_id] = symbol;
+		symbolList[var->_id] = *symbol;
 
 		current = current->_next;
 	}

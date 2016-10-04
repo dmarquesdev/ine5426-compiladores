@@ -22,6 +22,8 @@ namespace SyntaxTree
 
 	enum UniOperation { negative, negation, casting };
 
+	enum ListType { variable, paramDecl, params };
+
 	class Node;
 
 	typedef std::vector<Node*> NodeList;
@@ -29,8 +31,6 @@ namespace SyntaxTree
 	typedef SymTbl::Type Type;
 	typedef SymTbl::SymbolTable SymbolTable;
 	typedef std::vector<Type> TypeList;
-
-	static SymbolTable* CURRENT_ST;
 
 	class Node {
 	public:
@@ -59,15 +59,17 @@ namespace SyntaxTree
 		void coercion();
 	};
 
-	class VariableList : public Node {
+	class List : public Node {
 	public:
-		Variable* _node;
-		VariableList* _next;
+		Node* _node;
+		List* _next;
+		ListType _listType;
+
 		void printTree();
-		VariableList(Variable* node, VariableList* next);
+		List(Node* node, List* next, ListType listType = variable);
 		virtual void setType(Type type);
 		TypeList* getTypeList();
-		int getSize();
+		unsigned int getSize();
 	private:
 		TypeList _typeList;
 	};
@@ -164,8 +166,8 @@ namespace SyntaxTree
 
 	class VariableDeclaration : public Node {
 	public:
-		VariableList* _node;
-		VariableDeclaration(Type type, VariableList* node);
+		List* _node;
+		VariableDeclaration(Type type, List* node);
 		void printTree();
 		virtual void setType(Type type);
 	};

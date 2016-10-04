@@ -105,9 +105,10 @@ Variable::Variable(std::string id, Type type, Node* value) : Node(type) {
 * param node: nodo da árvore 
 * param next: nodo da árvore, proximo nodo da lista.
 */
-List::List(Variable* node, List* next) : Node(node->getType()) {
+List::List(Node* node, List* next, ListType listType) : Node(node->getType()) {
 	_node = node;
 	_next = next;
+	_listType = listType;
 }
 
 /*
@@ -214,6 +215,7 @@ Function::Function(FunctionDeclaration* declaration,
 	_declaration = declaration;
 	_body = body;
 	_returnValue = returnValue;
+	_parent = NULL;
 
 	setType(declaration->getType());
 
@@ -240,12 +242,14 @@ void VariableDeclaration::setType(Type type) {
 * param type: tipo da lista.
 */
 void List::setType(Type type) {
-	Node::setType(type);
+	if(_listType == variable) {
+		Node::setType(type);
 
-	_node->setType(type);
+		_node->setType(type);
 
-	if(_next != NULL) {
-		_next->setType(type);
+		if(_next != NULL) {
+			_next->setType(type);
+		}
 	}
 }
 
@@ -338,7 +342,7 @@ void ForLoop::setForBlock(Block* block) {
 TypeList* List::getTypeList() {
 	List* current = this;
 	while(current != NULL) {
-		_typeList.push_back(current->getType());
+		_typeList.push_back(current->_node->getType());
 
 		current = current->_next;
 	}
@@ -346,8 +350,8 @@ TypeList* List::getTypeList() {
 	return &_typeList;
 }
 
-int List::getSize() {
-	int counter = 0;
+unsigned int List::getSize() {
+	unsigned int counter = 0;
 
 	List* current = this;
 	while(current != NULL) {
@@ -378,9 +382,25 @@ void Variable::printTree() {
 void List::printTree() {
 	if(_next != NULL) {
 		_next->printTree();
-		std::cout << ", ";
+		if(_listType != params) {
+			std::cout << ",";
+		}
+		std::cout << " ";
 	}
-	_node->printTree();
+
+	Variable* var;
+
+	switch(_listType) {
+		case paramDecl:
+			var = dynamic_cast<Variable*>(_node);
+			std::cout << Symbol::typeToString(var->getType()) << " ";
+			_node->printTree();
+			break;
+
+		default:
+			_node->printTree();
+			break;
+	}
 }
 
 /*
@@ -393,26 +413,6 @@ void BinaryOp::printTree() {
 	_left->printTree();
 	std::cout << " ";
 	_right->printTree();
-}
-
-/*
-* Imprime o blocos de código, são os trechos de código dentro de condicionais e laços.
-*
-*/
-void Block::printTree() {
-	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
-
-	std::string tab = std::string(level*2, ' ');
-
-	for(Node* line : _lines) {
-		std::cout << tab;
-		line->printTree();
-		std::cout << std::endl;
-	}
 }
 
 /*
@@ -446,15 +446,31 @@ void Cast::printTree() {
 }
 
 /*
-* Imprime condicionais if,then,else. Cada um é um bloco a ser printado.
+* Imprime o blocos de código, são os trechos de código dentro de condicionais e laços.
 *
 */
-void Conditional::printTree() {
+void Block::printTree() {
 	int level = getLevel();
 
 	if(level > 0) {
 		level--;
 	}
+
+	std::string tab = std::string(level*2, ' ');
+
+	for(Node* line : _lines) {
+		std::cout << tab;
+		line->printTree();
+		std::cout << std::endl;
+	}
+}
+
+/*
+* Imprime condicionais if,then,else. Cada um é um bloco a ser printado.
+*
+*/
+void Conditional::printTree() {
+	int level = getLevel();
 
 	std::string tab = std::string(level*2, ' ');
 
@@ -477,10 +493,6 @@ void Conditional::printTree() {
 */
 void ForLoop::printTree() {
 	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
 
 	std::string tab = std::string(level*2, ' ');
 
@@ -510,6 +522,10 @@ void FunctionDeclaration::printTree() {
 }
 
 void Function::printTree() {
+	int level = getLevel();
+
+	std::string tab = std::string(level*2, ' ');
+
 	std::cout << Symbol::typeToString(_declaration->getType())
 	<< " fun: " << _declaration->_id
 	<< " (params: ";
@@ -524,7 +540,7 @@ void Function::printTree() {
 		_body->printTree();
 	}
 
-	std::cout << "  ret ";
+	std::cout << tab << "  ret ";
 	_returnValue->printTree();
 	std::cout << std::endl;
 }
@@ -538,6 +554,10 @@ void FunctionCall::printTree() {
 
 	std::cout << _id 
 	<< "[" << size << " params] ";
+
+	if(_parameters != NULL) {
+		_parameters->printTree();
+	}
 }
 
 /*
