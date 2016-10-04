@@ -1,1 +1,1 @@
-[line 3] re-definition of function myfunc
+[line 3]: semantic error: re-definition of function myfunc
