@@ -9,7 +9,7 @@ OUTPUT=lukacompiler
 all: flex yacc clang
 
 clang: *.cpp *.h
-	${CC} -g -o ${OUTPUT} *.cpp ${LLVMPARAM} ${PARAM}
+	${CC} -o ${OUTPUT} *.cpp ${LLVMPARAM} ${PARAM}
 
 yacc: parser.y
 	${BISON} --defines=parser.h --output=parser.cpp parser.y -v
@@ -18,7 +18,7 @@ flex: scanner.l
 	${FLEX} -o scanner.cpp scanner.l 
 
 clean:
-	rm parser.cpp parser.h scanner.cpp ${OUTPUT} parser.output
+	rm parser.cpp parser.h scanner.cpp ${OUTPUT}
 
 test: all
 	./${OUTPUT} < tests/v0.3/input/2.in

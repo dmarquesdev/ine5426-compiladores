@@ -1,7 +1,0 @@
-if true
-then {
-  if true
-  then {
-    int a = 0
-  }
-}
