@@ -116,7 +116,7 @@ lines:
     | forLoop 
     | lines forLoop { $$->append($2); }
     | funcDef 
-    | lines funcDef { $$->append($2); }
+    | lines funcDef { $$->append($2); $2->_parent = $$; }
     ;
 
 line: 

@@ -325,7 +325,6 @@ int Block::getLevel() {
 */
 void Block::append(Block* block) {
 	_lines.push_back(block);
-	block->_parent = this;
 }
 
 /*
@@ -451,10 +450,6 @@ void Cast::printTree() {
 */
 void Block::printTree() {
 	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
 
 	std::string tab = std::string(level*2, ' ');
 
