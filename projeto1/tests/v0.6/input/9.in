@@ -3,4 +3,4 @@ if true
 then {
 	int a
 }
-bool a = 0
+bool a = true

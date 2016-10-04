@@ -4,4 +4,4 @@ bool var: b = true
 = j [int] [int] + [float] i f
 = i [int] j
 = b & b [bool] f
-= f + [float] b 0.0
+= f + [float] b 0

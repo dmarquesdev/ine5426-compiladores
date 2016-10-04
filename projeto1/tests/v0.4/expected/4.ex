@@ -3,6 +3,5 @@ int var: a, b
 if: make_t
 then: 
   if: make_r
-  then:
+  then: 
     = b + a b
-  = a + a b

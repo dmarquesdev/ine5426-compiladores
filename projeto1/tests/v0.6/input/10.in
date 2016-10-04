@@ -1,4 +1,5 @@
-for int x = 0, x < 10, x = x + 1 {
+int x
+for x = 0, x < 10, x = x + 1 {
 	bool teste_
 }
 teste_ = true

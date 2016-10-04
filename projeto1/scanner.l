@@ -96,5 +96,4 @@ void error(const char* type, const char *s, ...){
 	std::string formatted;
 	formatted = type + std::string(" error: ") + s;
 	yyerror(formatted.c_str(), ap);
-	exit(0);
 }

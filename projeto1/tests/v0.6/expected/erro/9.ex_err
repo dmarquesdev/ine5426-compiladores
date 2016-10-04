@@ -1,1 +1,1 @@
-[line 6] semantic error: re-declaration of variable a
+[line 6]: semantic error: re-declaration of variable a

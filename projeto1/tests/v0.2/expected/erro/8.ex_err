@@ -1,1 +1,1 @@
-[line 2] semantic error: less operation expected integer but received boolean
+[line 2]: semantic error: less operation expected integer but received boolean

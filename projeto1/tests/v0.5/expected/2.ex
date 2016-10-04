@@ -1,5 +1,5 @@
-float var: f = 0.0, g = 1.0
+float var: f = 0, g = 1
 for: , <= f 12.3, 
-do:
+do: 
   = f + f * g g
 
