@@ -14,12 +14,18 @@ VERSAO=$1
 					for i in $LISTA 
 						do
 						NOME=$(echo $i|cut -d"." -f1)
+						cd tests/$j
+						mkdir output
+						cd output
+						mkdir erro
+						cd ../../..
 						echo '\n=====Testando arquivo:' tests/$j/input/$i 
 						./lukacompiler < tests/$j/input/$i > tests/$j/output/$NOME.out 2> tests/$j/output/erro/$NOME.err
 						echo '\nDiferenças entre arquivos de saída padrão:\n'
 						diff tests/$j/output/$NOME.out tests/$j/expected/$NOME.ex
 						echo '\nDiferenças entre arquivos de erro:\n'
 						diff tests/$j/output/erro/$NOME.err tests/$j/expected/erro/$NOME.ex_err
+						echo '======================================'
 					done
 	 			done	
 			 ;;
@@ -42,12 +48,18 @@ VERSAO=$1
 			for i in $LISTA 
 			do
 				NOME=$(echo $i|cut -d"." -f1)
-				echo '\n=====Testando arquivo:' $i 
+				cd tests/v$VERSAO
+				mkdir output
+				cd output
+				mkdir erro
+				cd ../../..
+				echo '\n=====Testando arquivo: versão '$VERSAO $i 
 				./lukacompiler < tests/v$VERSAO/input/$i > tests/v$VERSAO/output/$NOME.out 2> tests/v$VERSAO/output/erro/$NOME.err
 				echo '\nDiferenças entre arquivos de saída padrão:\n'
 				diff tests/v$VERSAO/output/$NOME.out tests/v$VERSAO/expected/$NOME.ex
 				echo '\nDiferenças entre arquivos de erro:\n'
 				diff tests/v$VERSAO/output/erro/$NOME.err tests/v$VERSAO/expected/erro/$NOME.ex_err
+				echo '======================================'
 			done ;;
 
 	esac 
