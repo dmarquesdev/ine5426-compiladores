@@ -1,1 +1,1 @@
-[line 6] semantic error: attributin operation expected integer but received float
+[line 6]: semantic error: attribution operation expected bool but received float

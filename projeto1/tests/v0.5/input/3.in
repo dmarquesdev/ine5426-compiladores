@@ -1,4 +1,4 @@
 bool tes = true
-for , tes,, {
+for , tes , {
 	int a = 10
 }

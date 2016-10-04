@@ -1,1 +1,1 @@
-[Line 3] semantic error: function x expects 1 parameters but received 3
+[Line 3]: semantic error: function x expects 1 parameters but received 3

@@ -1,9 +1,9 @@
 if true 
 then {
-	int a = 0
+	int a
 }
 if true 
 then {
 	int a
 }
-int a = 10
+int a

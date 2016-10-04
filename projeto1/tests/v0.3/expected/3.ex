@@ -1,3 +1,3 @@
 int var: a, b
 float var: c
-= c [float] + a - 0.1 b
+= c - + [float] a 0.1 [float] b

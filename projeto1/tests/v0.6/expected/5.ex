@@ -1,5 +1,5 @@
 float var: a_
 if: true
-then:
+then: 
   float var: a
 float var: a

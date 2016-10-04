@@ -1,1 +1,1 @@
-[line 5] semantic error: undeclared variable a
+[line 5]: semantic error: undeclared variable a

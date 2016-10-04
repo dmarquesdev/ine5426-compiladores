@@ -1,7 +1,7 @@
 if: true 
 then: 
-  int var: a = 0
+  int var: a
 if: true 
 then:
   int var: a
-int var: a = 10
+int var: a

@@ -1,4 +1,4 @@
-int a
+bool a
 if true
 then {
 	float a = 0.1

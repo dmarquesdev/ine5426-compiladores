@@ -1,11 +1,12 @@
 float var: f
 if: true
-then:
+then: 
   if: <= 2.3 [float] 4
-  then:
+  then: 
     if: >= + 2 3 5
-    then:
-      = f 2.0
-  else:
-    = f 1.0
+    then: 
+      = f 2
+
+  else: 
+    = f 1
 
