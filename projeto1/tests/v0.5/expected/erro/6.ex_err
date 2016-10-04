@@ -1,1 +1,1 @@
-[line 2]: semantic error: for loop test operation expected boolean but received integer
+[line 2]: semantic error: for loop test operation expected boolean but received int

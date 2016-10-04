@@ -1,6 +1,7 @@
 /* Inspirated by https://github.com/llpilla/compiler_examples/blob/master/simple_ast/st.cpp */
 
 #include "symbol_table.h"
+#include <cstring>
 
 using namespace SymTbl;
 
@@ -21,7 +22,13 @@ SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* val
 	if (symb == NULL) {
 		symbolList[id] = symbol;
 	} else {
-		error("semantic", "re-declaration of variable %s\n", id.c_str());
+		//concatenando char* (modo que funcionou)
+		char buf[200]; 
+		strcpy(buf, "re-declaration of variable "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "re-declaration of variable %s\n", id.c_str()); //<- não funcionou
 	}
 
 	return new SyntaxTree::Variable(id, Type::unknown, value);
@@ -35,7 +42,15 @@ SyntaxTree::Node* SymbolTable::newVariable(std::string id, SyntaxTree::Node* val
  */
 SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
 	Symbol* symb = find(id);
-	if(symb == NULL) { error("semantic", "undeclared variable %s\n", id.c_str()); }
+	if(symb == NULL) { 
+		//concatenando char* (modo que funcionou)
+		char buf[200]; 
+		strcpy(buf, "undeclared variable "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "undeclared variable %s\n", id.c_str()); 
+	}
 
 	return new SyntaxTree::Variable(id, symb->_type, NULL);
 }
@@ -48,7 +63,15 @@ SyntaxTree::Node* SymbolTable::useVariable(std::string id) {
  */
 SyntaxTree::Node* SymbolTable::assignVariable(std::string id) {
 	Symbol* symb = find(id);
-	if(symb == NULL) { error("semantic", "undeclared variable %s\n", id.c_str()); }
+	if(symb == NULL) { 
+		//concatenando char* (modo que funcionou)
+		char buf[200]; 
+		strcpy(buf, "undeclared variable "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "undeclared variable %s\n", id.c_str()); 
+	}
 	symb->_initialized = true;
 
 	return new SyntaxTree::Variable(id, symb->_type, NULL);

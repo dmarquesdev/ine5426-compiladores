@@ -2,6 +2,7 @@
 
 #include "syntax_tree.h"
 #include "symbol_table.h"
+#include <cstring>
 
 using namespace SyntaxTree;
 
@@ -23,10 +24,20 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 
 	//verifica se os tipos dos operando satisfazem os tipos permitidos pelo operador.
 	if(!isValid(left, right, op)) {
-		error("semantic", "%s operation expected %s but received %s\n", 
+		//concatenando char *, foi unico jeito que funcionou.
+		char buf[200]; 
+		strcpy(buf, Node::operationNameToString(op));
+		strcat(buf, " operation expected "); 
+		strcat(buf, Symbol::typeToString(left->getType()));
+		strcat(buf, " but received ");
+		strcat(buf, Symbol::typeToString(right->getType()));
+		strcat(buf, "\n");
+		error("semantic", buf);
+
+		/*error("semantic", "%s operation expected %s but received %s\n", 
 			Node::operationNameToString(op), 
 			Symbol::typeToString(left->getType()), 
-			Symbol::typeToString(right->getType()));
+			Symbol::typeToString(right->getType())); */
 	}
 
 	//define o tipo da operação de acordo como operador.
@@ -170,8 +181,14 @@ Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) :
 	}
 
 	if(_condition->getType() != Type::t_bool) {
-		error("semantic", "test operation expected boolean but received %s", 
-			Symbol::typeToString(_condition->getType()));
+		char buf[200]; 
+		strcpy(buf, "test operation expected boolean but received ");
+		strcat(buf, Symbol::typeToString(_condition->getType())); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+
+		/*error("semantic", "test operation expected boolean but received %s", 
+			Symbol::typeToString(_condition->getType())); */
 	}
 }
 
@@ -186,8 +203,14 @@ Conditional::Conditional(Node* condition, Block* ifBlock, Block* elseBlock) :
 ForLoop::ForLoop(Node* initialization, Node* test, Node* iteration) : 
 	_initialization(initialization), _test(test), _iteration(iteration) {
 	if(_test->getType() != Type::t_bool) {
-		error("semantic", "for loop test operation expected boolean but received %s", 
-			Symbol::typeToString(_test->getType()));
+		char buf[200]; 
+		strcpy(buf, "for loop test operation expected boolean but received ");
+		strcat(buf, Symbol::typeToString(_test->getType())); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+
+		/*error("semantic", "for loop test operation expected boolean but received %s", 
+			Symbol::typeToString(_test->getType()));*/
 	}
 }
 
