@@ -21,7 +21,7 @@ integer [0-9]+
 float ({integer}\.{integer}*|{integer}*\.{integer})
 boolean (true|false)
 
-var_name [a-zA-Z]([a-zA-Z0-9_])*
+id [a-zA-Z]([a-zA-Z0-9_])*
 type (int|float|bool)
 cast \[{type}\]
 not_valid [^a-zA-Z0-9\n \t\{\}\+\*\-\/\(\)\=\,\!\>\<\&\|\_]*
@@ -40,6 +40,8 @@ not_valid [^a-zA-Z0-9\n \t\{\}\+\*\-\/\(\)\=\,\!\>\<\&\|\_]*
 "then"				{return T_THEN;}
 "else"				{return T_ELSE;}
 "for"				{return T_FOR;}
+"fun"				{return T_FUNC;}
+"ret"				{return T_RETURN;}
 
 \{					{return T_OPEN_CBRACK;}
 \}					{return T_CLOSE_CBRACK;}
@@ -63,7 +65,7 @@ not_valid [^a-zA-Z0-9\n \t\{\}\+\*\-\/\(\)\=\,\!\>\<\&\|\_]*
 \&					{return T_BOOL_AND;}
 "|"					{return T_BOOL_OR;}
 
-{var_name}			{yylval.cval = strdup(yytext); return T_VAR_NAME;}
+{id}				{yylval.cval = strdup(yytext); return T_ID;}
 {not_valid}         {char buf[100]; strcpy(buf, "unknown symbol "); strcat(buf, yytext); strcat(buf, "\n"); error("lexical", buf);} /*complains about every unknown character*/
 
 %%

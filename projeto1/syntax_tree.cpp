@@ -40,15 +40,6 @@ BinaryOp::BinaryOp(Node* left, Operation op, Node* right) : Node(left->getType()
 /*
 * Verifica se a operação binaria é valida.
 *
-* Retorna um boolean
-*/
-bool BinaryOp::isValid() {
-	return isValid(_left, _right, _op);
-}
-
-/*
-* Verifica se a operação binaria é valida.
-*
 * param n1: nodo da arvore, equivale ao operando definido a esquerda da operação binária.
 * param n2: nodo da arvore, equiva ao operando definido a direita da operação binária.
 * param op: equivale ao operador da operação binária.
@@ -114,9 +105,10 @@ Variable::Variable(std::string id, Type type, Node* value) : Node(type) {
 * param node: nodo da árvore 
 * param next: nodo da árvore, proximo nodo da lista.
 */
-List::List(Node* node, Node* next) : Node(node->getType()) {
+List::List(Node* node, List* next, ListType listType) : Node(node->getType()) {
 	_node = node;
 	_next = next;
+	_listType = listType;
 }
 
 /*
@@ -146,7 +138,7 @@ Cast::Cast(Type type, Node* node) : UnaryOp(node, casting) {
 * param type: tipo da variavel
 * param node: nodo da árvore com a veriavel.
 */
-Declaration::Declaration(Type type, Node* node) : Node(type) {
+VariableDeclaration::VariableDeclaration(Type type, List* node) : Node(type) {
 	_node = node;
 	setType(type);
 }
@@ -212,7 +204,33 @@ Float::Float(float value) : Node(Type::t_float), _value(value) {}
 */
 Boolean::Boolean(bool value) : Node(Type::t_bool), _value(value) {}
 
-void Declaration::setType(Type type) {
+FunctionDeclaration::FunctionDeclaration(std::string id, Type type, 
+	List* parameters) : Node(type) {
+	_id = id;
+	_parameters = parameters;
+}
+
+Function::Function(FunctionDeclaration* declaration, 
+	Block* body, Node* returnValue) {
+	_declaration = declaration;
+	_body = body;
+	_returnValue = returnValue;
+	_parent = NULL;
+
+	setType(declaration->getType());
+
+	if(_body != NULL) {
+		_body->_parent = this;
+		_body->_symbolTable = new SymbolTable(_symbolTable);
+	}
+}
+
+FunctionCall::FunctionCall(std::string id, List* parameters) {
+	_id = id;
+	_parameters = parameters;
+}
+
+void VariableDeclaration::setType(Type type) {
 	Node::setType(type);
 
 	_node->setType(type);
@@ -224,12 +242,14 @@ void Declaration::setType(Type type) {
 * param type: tipo da lista.
 */
 void List::setType(Type type) {
-	Node::setType(type);
+	if(_listType == variable) {
+		Node::setType(type);
 
-	_node->setType(type);
+		_node->setType(type);
 
-	if(_next != NULL) {
-		_next->setType(type);
+		if(_next != NULL) {
+			_next->setType(type);
+		}
 	}
 }
 
@@ -305,7 +325,6 @@ int Block::getLevel() {
 */
 void Block::append(Block* block) {
 	_lines.push_back(block);
-	block->_parent = this;
 }
 
 /*
@@ -317,6 +336,30 @@ void ForLoop::setForBlock(Block* block) {
 	block->_parent = this;
 	_forBlock = block;
 	_forBlock->_symbolTable = new SymbolTable(_symbolTable);
+}
+
+TypeList* List::getTypeList() {
+	List* current = this;
+	while(current != NULL) {
+		_typeList.push_back(current->_node->getType());
+
+		current = current->_next;
+	}
+
+	return &_typeList;
+}
+
+unsigned int List::getSize() {
+	unsigned int counter = 0;
+
+	List* current = this;
+	while(current != NULL) {
+		counter++;
+
+		current = current->_next;
+	}
+
+	return counter;
 }
 
 /*
@@ -338,9 +381,25 @@ void Variable::printTree() {
 void List::printTree() {
 	if(_next != NULL) {
 		_next->printTree();
-		std::cout << ", ";
+		if(_listType != params) {
+			std::cout << ",";
+		}
+		std::cout << " ";
 	}
-	_node->printTree();
+
+	Variable* var;
+
+	switch(_listType) {
+		case paramDecl:
+			var = dynamic_cast<Variable*>(_node);
+			std::cout << Symbol::typeToString(var->getType()) << " ";
+			_node->printTree();
+			break;
+
+		default:
+			_node->printTree();
+			break;
+	}
 }
 
 /*
@@ -353,26 +412,6 @@ void BinaryOp::printTree() {
 	_left->printTree();
 	std::cout << " ";
 	_right->printTree();
-}
-
-/*
-* Imprime o blocos de código, são os trechos de código dentro de condicionais e laços.
-*
-*/
-void Block::printTree() {
-	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
-
-	std::string tab = std::string(level*2, ' ');
-
-	for(Node* line : _lines) {
-		std::cout << tab;
-		line->printTree();
-		std::cout << std::endl;
-	}
 }
 
 /*
@@ -391,7 +430,7 @@ void UnaryOp::printTree() {
 /*
 * Imprime a declaração de variaveis.
 */
-void Declaration::printTree() {
+void VariableDeclaration::printTree() {
 	std::cout << Symbol::typeToString(getType()) << " ";
 	std::cout << "var: ";
 	_node->printTree();
@@ -406,15 +445,27 @@ void Cast::printTree() {
 }
 
 /*
+* Imprime o blocos de código, são os trechos de código dentro de condicionais e laços.
+*
+*/
+void Block::printTree() {
+	int level = getLevel();
+
+	std::string tab = std::string(level*2, ' ');
+
+	for(Node* line : _lines) {
+		std::cout << tab;
+		line->printTree();
+		std::cout << std::endl;
+	}
+}
+
+/*
 * Imprime condicionais if,then,else. Cada um é um bloco a ser printado.
 *
 */
 void Conditional::printTree() {
 	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
 
 	std::string tab = std::string(level*2, ' ');
 
@@ -437,10 +488,6 @@ void Conditional::printTree() {
 */
 void ForLoop::printTree() {
 	int level = getLevel();
-
-	if(level > 0) {
-		level--;
-	}
 
 	std::string tab = std::string(level*2, ' ');
 
@@ -465,6 +512,48 @@ void ForLoop::printTree() {
 	}
 }
 
+void FunctionDeclaration::printTree() {
+
+}
+
+void Function::printTree() {
+	int level = getLevel();
+
+	std::string tab = std::string(level*2, ' ');
+
+	std::cout << Symbol::typeToString(_declaration->getType())
+	<< " fun: " << _declaration->_id
+	<< " (params: ";
+
+	if(_declaration->_parameters != NULL) {
+		_declaration->_parameters->printTree();
+	}
+
+	std::cout << ")" << std::endl;
+
+	if(_body != NULL) {
+		_body->printTree();
+	}
+
+	std::cout << tab << "  ret ";
+	_returnValue->printTree();
+	std::cout << std::endl;
+}
+
+void FunctionCall::printTree() {
+	int size = 0;
+
+	if(_parameters != NULL) {
+		size = _parameters->getSize();
+	}
+
+	std::cout << _id 
+	<< "[" << size << " params] ";
+
+	if(_parameters != NULL) {
+		_parameters->printTree();
+	}
+}
 
 /*
 * Retorna a string do operador de cada operação.

@@ -22,14 +22,15 @@ namespace SyntaxTree
 
 	enum UniOperation { negative, negation, casting };
 
+	enum ListType { variable, paramDecl, params };
+
 	class Node;
 
 	typedef std::vector<Node*> NodeList;
 
 	typedef SymTbl::Type Type;
 	typedef SymTbl::SymbolTable SymbolTable;
-
-	static SymbolTable* CURRENT_ST;
+	typedef std::vector<Type> TypeList;
 
 	class Node {
 	public:
@@ -47,15 +48,6 @@ namespace SyntaxTree
 		Type _type;
 	};
 
-	class List : public Node {
-	public:
-		Node* _node;
-		Node* _next;
-		void printTree();
-		List(Node* node, Node* next);
-		virtual void setType(Type type);
-	};
-
 	class Variable : public Node {
 	public:
 		std::string _id;
@@ -66,6 +58,21 @@ namespace SyntaxTree
 		bool isValueValid();
 	private:
 		void coercion();
+	};
+
+	class List : public Node {
+	public:
+		Node* _node;
+		List* _next;
+		ListType _listType;
+
+		void printTree();
+		List(Node* node, List* next, ListType listType = variable);
+		virtual void setType(Type type);
+		TypeList* getTypeList();
+		unsigned int getSize();
+	private:
+		TypeList _typeList;
 	};
 
 	class BinaryOp : public Node {
@@ -120,6 +127,31 @@ namespace SyntaxTree
 		Block* _forBlock;
 	};
 
+	class FunctionDeclaration : public Node {
+	public:
+		std::string _id;
+		List* _parameters;
+		FunctionDeclaration(std::string id, Type type, List* parameters);
+		void printTree();
+	};
+
+	class Function : public Block {
+	public:
+		FunctionDeclaration* _declaration;
+		Block* _body;
+		Node* _returnValue;
+		Function(FunctionDeclaration* declaration, Block* body, Node* returnValue);
+		void printTree();
+	};
+
+	class FunctionCall : public Node {
+	public:
+		std::string _id;
+		List* _parameters;
+		FunctionCall(std::string id, List* parameters);
+		void printTree();
+	};
+
 	class UnaryOp : public Node {
 	public:
 		Node* _node;
@@ -134,10 +166,10 @@ namespace SyntaxTree
 		void printTree();
 	};
 
-	class Declaration : public Node {
+	class VariableDeclaration : public Node {
 	public:
-		Node* _node;
-		Declaration(Type type, Node* node);
+		List* _node;
+		VariableDeclaration(Type type, List* node);
 		void printTree();
 		virtual void setType(Type type);
 	};
