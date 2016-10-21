@@ -1,6 +1,6 @@
 {
   "name": "native-ide",
-  "version": "0.0.1-alpha",
+  "version": "0.1",
   "description": "NativeIDE is a text editor that let you build a React Native app with a lightweight live preview feedback, rendering your components into HTML",
   "main": "main.js",
   "scripts": {
