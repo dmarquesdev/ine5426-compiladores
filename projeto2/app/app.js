@@ -1,15 +1,38 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import esprima from 'esprima';
 
 import { Editor } from './components';
 
 class AppContainer extends React.Component {
+  constructor(props) {
+  	super(props);
+  	this.handleCodeChange = this.handleCodeChange.bind(this);
+  	this.handleKeyStroke = this.handleKeyStroke.bind(this);
+  	this.state = {code: '', parsed: {}};
+  }
+
   render() {
     return (
       <div>
-        <Editor />
+        <Editor handleChange={this.handleCodeChange} 
+        	handleKey={this.handleKeyStroke}
+        	code={this.state.code} />
+        <div>
+        	{JSON.stringify(this.state.parsed, null, '\t')}
+        </div>
       </div>
     );
+  }
+
+  handleCodeChange(e) {
+  	this.setState({code: e.target.value});
+  }
+
+  handleKeyStroke(e) {
+  	if(e.target.value === '\n') {
+  		this.setState({parsed: esprima.parse(this.state.code)});
+  	}
   }
 }
 

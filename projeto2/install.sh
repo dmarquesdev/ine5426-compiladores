@@ -4,7 +4,7 @@ VERSION=$(node -v)
 
 if [[ -z "$VERSION" ]]; then
   echo "[-] Seems like Node.js isn't installed! Installing..."
-  apt-get install -y nodejs npm
+  apt-get update && apt-get install -y nodejs npm nodejs-legacy
 fi
 
 echo "[*] Installing dependencies via NPM..."
