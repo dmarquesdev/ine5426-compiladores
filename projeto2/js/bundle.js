@@ -99,12 +99,7 @@
 	        null,
 	        _react2.default.createElement(_components.Editor, { handleChange: this.handleCodeChange,
 	          handleKey: this.handleKeyStroke,
-	          code: this.state.code }),
-	        _react2.default.createElement(
-	          'div',
-	          null,
-	          JSON.stringify(this.state.parsed, null, '\t')
-	        )
+	          code: this.state.code })
 	      );
 	    }
 	  }, {
@@ -115,7 +110,8 @@
 	  }, {
 	    key: 'handleKeyStroke',
 	    value: function handleKeyStroke(e) {
-	      if (e.target.value === '\n') {
+	      if (e.key == 'Enter') {
+	        alert("code: " + this.state.code);
 	        this.setState({ parsed: _esprima2.default.parse(this.state.code) });
 	      }
 	    }
@@ -27910,14 +27906,22 @@
 	        null,
 	        _react2.default.createElement('textarea', { id: 'editor-textarea', value: this.props.code,
 	          onChange: this.props.handleChange,
-	          onKeyDown: this.props.handleKey,
-	          style: { 'width': '100%', 'height': '100%' } })
+	          onKeyPress: this.props.handleKey,
+	          style: editorStyle })
 	      );
 	    }
 	  }]);
 
 	  return Editor;
 	}(_react2.default.Component);
+
+	var editorStyle = {
+	  'width': '100%',
+	  'height': '100%',
+	  'border': 'none',
+	  'background-color': '#333',
+	  'color': '#CCC'
+	};
 
 	exports.default = Editor;
 
