@@ -16,11 +16,15 @@ class Editor extends React.Component {
 }
 
 const editorStyle = {
-  'width': '100%',
-  'height': '100%',
+  'width': '100vw',
+  'height': '100vh',
   'border': 'none',
-  'background-color': '#333',
-  'color': '#EEE'
+  'backgroundColor': '#333',
+  'color': '#EEE',
+  'resize': 'none',
+  'position': 'fixed',
+  'left': '0',
+  'top': '0'
 }
 
 export default Editor;
