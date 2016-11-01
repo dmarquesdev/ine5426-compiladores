@@ -5,7 +5,7 @@ import esprima from 'esprima';
 class Editor extends React.Component {
   render() {
     return (
-    	<div>
+    	<div style={{'height': '50vh'}}>
       		<textarea id="editor-textarea" value={this.props.code}
       			onChange={this.props.handleChange}
       			onKeyPress={this.props.handleKey}
@@ -17,7 +17,7 @@ class Editor extends React.Component {
 
 const editorStyle = {
   'width': '100vw',
-  'height': '100vh',
+  'height': '50vh',
   'border': 'none',
   'backgroundColor': '#333',
   'color': '#EEE',

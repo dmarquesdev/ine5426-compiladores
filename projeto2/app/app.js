@@ -9,7 +9,7 @@ class AppContainer extends React.Component {
   	super(props);
   	this.handleCodeChange = this.handleCodeChange.bind(this);
   	this.handleKeyStroke = this.handleKeyStroke.bind(this);
-  	this.state = {code: '', parsed: {}};
+  	this.state = {code: '', parsed: {}, tokens: {}};
   }
 
   render() {
@@ -18,6 +18,12 @@ class AppContainer extends React.Component {
         <Editor handleChange={this.handleCodeChange}
         	handleKey={this.handleKeyStroke}
         	code={this.state.code} />
+        <div>
+          {JSON.stringify(this.state.parsed)}
+        </div>
+        <div>
+          {JSON.stringify(this.state.tokens)}
+        </div>
       </div>
     );
   }
@@ -27,9 +33,14 @@ class AppContainer extends React.Component {
   }
 
   handleKeyStroke(e) {
+    this.setState({
+      tokens: esprima.tokenize(this.state.code)
+    });
+
   	if(e.key == 'Enter') {
-      alert("code: "+ this.state.code);
-  		this.setState({parsed: esprima.parse(this.state.code)});
+  		this.setState({
+        parsed: esprima.parse(this.state.code, { sourceType: 'module' })
+      });
   	}
   }
 }
