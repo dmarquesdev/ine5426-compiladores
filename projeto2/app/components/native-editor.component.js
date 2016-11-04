@@ -1,15 +1,13 @@
 import React from 'react';
 
-import esprima from 'esprima';
+import { Editor } from 'draft-js';
 
-class Editor extends React.Component {
+class NativeEditor extends React.Component {
   render() {
     return (
-    	<div style={{'height': '50vh'}}>
-      		<textarea id="editor-textarea" value={this.props.code}
-      			onChange={this.props.handleChange}
-      			onKeyPress={this.props.handleKey}
-      			style={editorStyle} />
+      <div style={editorStyle}>
+    	 <Editor editorState={this.props.editorState}
+          onChange={this.props.onChange} />
       </div>
     );
   }

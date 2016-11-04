@@ -1,1 +1,1 @@
-export { default as Editor } from './editor.component'
+export { default as NativeEditor } from './native-editor.component'

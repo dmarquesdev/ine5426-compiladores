@@ -2,22 +2,38 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import esprima from 'esprima';
 
-import { Editor } from './components';
+import { EditorState, CompositeDecorator } from 'draft-js';
+
+import { NativeEditor } from './components';
 
 class AppContainer extends React.Component {
   constructor(props) {
   	super(props);
-  	this.handleCodeChange = this.handleCodeChange.bind(this);
-  	this.handleKeyStroke = this.handleKeyStroke.bind(this);
-  	this.state = {code: '', parsed: {}, tokens: {}};
+
+    const decorator = new CompositeDecorator([
+      {
+        strategy: handleToken,
+        component: TokenSpan
+      }
+    ]);
+
+  	this.onChange = (editorState) => this.setState({editorState});
+    this.handleReturn = this.handleReturn.bind(this);
+  	this.state = {
+      parsed: {},
+      tokens: {},
+      editorState: EditorState.createEmpty(decorator)
+    };
   }
 
   render() {
+    const {editorState} = this.state;
+
     return (
       <div>
-        <Editor handleChange={this.handleCodeChange}
-        	handleKey={this.handleKeyStroke}
-        	code={this.state.code} />
+        <NativeEditor editorState={editorState}
+          handleReturn={this.handleReturn}
+          onChange={this.onChange} />
         <div>
           {JSON.stringify(this.state.parsed)}
         </div>
@@ -28,21 +44,22 @@ class AppContainer extends React.Component {
     );
   }
 
-  handleCodeChange(e) {
-  	this.setState({code: e.target.value});
+  handleReturn(e) {
+    const {editorState} = this.state;
+    const content = editorState.getCurrentContent();
+    this.setState({parsed: esprima.parse(content.getSelection().get)});
   }
+}
 
-  handleKeyStroke(e) {
-    this.setState({
-      tokens: esprima.tokenize(this.state.code)
-    });
+function handleToken(contentState, contentBlock, callback) {
+  // INPUT TOKEN PARSE AND STRATEGY FOR HIGHLIGHT HERE
+}
 
-  	if(e.key == 'Enter') {
-  		this.setState({
-        parsed: esprima.parse(this.state.code, { sourceType: 'module' })
-      });
-  	}
-  }
+const TokenSpan = (props) => {
+  // THIS IS THE COMPONENT RENDERED WHEN A TOKEN IS DETECTED
+  return (
+    <span style="color: #F00;">{props.children}</span>
+  );
 }
 
 ReactDOM.render(<AppContainer />, document.getElementById('root'));
