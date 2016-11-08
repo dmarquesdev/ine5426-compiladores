@@ -8,7 +8,7 @@ function createWindow() {
   const {width, height} = electron.screen.getPrimaryDisplay().workAreaSize
   mainWindow = new BrowserWindow({width, height});
   mainWindow.loadURL(`file://${__dirname}/index.html`);
-  //mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
