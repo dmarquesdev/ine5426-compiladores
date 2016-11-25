@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import esprima from 'esprima';
 
-import { EditorState, CompositeDecorator } from 'draft-js';
-
 import { NativeEditor } from './components';
+
+import { translate } from './util';
 
 class AppContainer extends React.Component {
   constructor(props) {
@@ -49,6 +49,7 @@ class AppContainer extends React.Component {
       });
 
       console.log(JSON.stringify(this.state.parsed, null, '\t'));
+      translate(this.state.parsed);
     }
   }
 }
