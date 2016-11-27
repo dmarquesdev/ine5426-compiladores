@@ -26,9 +26,7 @@ class AppContainer extends React.Component {
       <div>
         <textarea value={this.state.code} onChange={this.handleChange}
           onKeyPress={this.handleKeyPress} />
-        <div id="preview">
-          {translate(this.state.parsed)}
-        </div>
+        <div id="preview" />
       </div>
     );
   }
@@ -46,6 +44,9 @@ class AppContainer extends React.Component {
       });
 
       console.log(JSON.stringify(this.state.parsed, null, '\t'));
+      document
+        .getElementById("preview")
+        .appendChild(translate(this.state.parsed));
     }
   }
 }

@@ -1,54 +1,66 @@
 import { walk } from 'esprima-walk';
 import React from 'react';
 
-const path = {
-  mapView: 'assets/images/mapview.jpg'
+function map(component) {
+  const name = component.openingElement.name.name;
+  var element = null;
+  var content = "";
+
+  switch(name) {
+    case "View":
+      element = document.createElement('div');
+      element.setAttribute('class', 'view');
+      break;
+
+    case "Text":
+      element = document.createElement('span');
+      for(var i = 0; i < component.children.length; i++) {
+        content += component.children[i].value;
+      }
+      element.innerHTML = content;
+      break;
+
+    case "Button":
+      const attributes = component.openingElement.attributes;
+      for(var i = 0; i < attributes.length; i++) {
+        const attribute = attributes[i];
+        if(attribute.name.name == 'title') {
+          content = attribute.value.value;
+          break;
+        }
+      }
+      element = document.createElement('button');
+      element.setAttribute('class', 'rn-button');
+      element.innerHTML = content;
+      break;
+
+    case "TextInput":
+      break;
+  }
+
+  return element;
 }
 
-const ComponentMap = {};
-ComponentMap['Button'] = (<button className="button" />);
-ComponentMap['DrawerLayoutAndroid'] = (<div className="drawer-android" />);
-ComponentMap['Image'] = (<img className="image" />);
-ComponentMap['ListView'] = (<ul className="list-view" />);
-ComponentMap['MapView'] = (<img src={path.mapView} />);
-ComponentMap['Modal'] = (<div className="modal" />);
-ComponentMap['ScrollView'] = (<div className="scroll-view" />);
-ComponentMap['Slider'] = (<input type="range" className="slider" />);
-ComponentMap['Switch'] = (<span className="switch" />);
-ComponentMap['TabBar'] = (<div className="tab-bar" />);
-ComponentMap['Text'] = (<span className="text" />);
-ComponentMap['TextInput'] = (<input className="text-input" />);
-ComponentMap['View'] = (<div className="view" />);
-ComponentMap['Alert'] = (<div className="alert" />);
+function buildHTMLTree(root) {
+  var html = null;
 
-function rebuildTree(dict, parent) {
-  if(!parent) {
-    return null;
-  }
+  if(root) {
+    const rootElement = map(root);
 
-  var children = [];
-  for(var i = 0; i < parent.children.length; i++) {
-    var child = parent.children[i];
-    if(child.type != 'JSXElement') {
-      continue;
+    for(var i = 0; i < root.children.length; i++) {
+      const child = root.children[i];
+      if(child.type == 'JSXElement') {
+        rootElement.appendChild(buildHTMLTree(child));
+      }
     }
 
-    children.push(
-      <child>
-        {rebuildTree(dict, child)}
-      </child>
-    );
+    html = rootElement;
   }
 
-  return (
-    <parent>
-      {children}
-    </parent>
-  )
+  return html;
 }
 
 export function translate(parsed) {
-  var components = [];
   var root = null;
 
   // Gather all components from JSX
@@ -57,19 +69,9 @@ export function translate(parsed) {
       if(!root) {
         root = node;
       }
-      components.push(node);
     }
   });
 
-  var translateDict = {};
-
-  // Translate all React Native components to equivalent in pure JSX
-  for(var i = 0; i < components.length; i++) {
-    var component = components[i];
-    const name = component.openingElement.name.name;
-    translateDict[component] = ComponentMap[name];
-  }
-
   // Rebuild tree
-  return rebuildTree(translateDict, root);
+  return buildHTMLTree(root);
 }
