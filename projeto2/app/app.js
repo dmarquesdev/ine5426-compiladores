@@ -4,7 +4,7 @@ import esprima from 'esprima';
 
 import { NativeEditor } from './components';
 
-import { translate } from './util';
+import { translate, clearPreview, checkSemantic } from './util';
 
 class AppContainer extends React.Component {
   constructor(props) {
@@ -13,7 +13,9 @@ class AppContainer extends React.Component {
   	this.state = {
       parsed: {},
       tokens: {},
-      code: ''
+      code: '',
+      errorDetected: false,
+      errors: []
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -21,9 +23,18 @@ class AppContainer extends React.Component {
   }
 
   render() {
+    var errors = [];
+    var count = 0;
+
+    if(this.state.errorDetected) {
+      this.state.errors.forEach((elem, i) => {
+        errors.push(<p key={"error"+(++count)}>{elem}</p>);
+      });
+    }
 
     return (
       <div>
+        {errors}
         <textarea value={this.state.code} onChange={this.handleChange}
           onKeyPress={this.handleKeyPress} />
         <div id="preview" />
@@ -38,15 +49,39 @@ class AppContainer extends React.Component {
   }
 
   handleKeyPress(e) {
-    if(e.key == 'Enter') {
+    try {
       this.setState({
-        parsed: esprima.parse(this.state.code, {jsx: true, sourceType: 'module'})
+        parsed: esprima.parse(this.state.code,
+          {jsx: true, sourceType: 'module'}),
+        errorDetected: false
       });
+
+      try {
+        checkSemantic(this.state.parsed);
+      } catch(err) {
+        this.setState({
+          errors: err
+        });
+
+        throw "Semantic Error!";
+      }
 
       console.log(JSON.stringify(this.state.parsed, null, '\t'));
       document
         .getElementById("preview")
         .appendChild(translate(this.state.parsed));
+    } catch(err) {
+      this.setState({
+        errorDetected: true
+      });
+
+      if(err != 'Semantic Error!') {
+        this.setState({
+          errors: ["Error: Line " + err.lineNumber + ": " + err.description]
+        })
+      }
+
+      clearPreview(document.getElementById("preview"));
     }
   }
 }
