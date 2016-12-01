@@ -6,7 +6,7 @@ class Test extends React.Component {
   render() {
     return (
       <View>
-        <Text>Olar</Text>
+        <Text>Hello World</Text>
         <Button title="Press Me!" />
       </View>
     );

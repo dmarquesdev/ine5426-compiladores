@@ -15,7 +15,8 @@ class AppContainer extends React.Component {
       tokens: {},
       code: '',
       errorDetected: false,
-      errors: []
+      errors: [],
+      html: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -26,7 +27,7 @@ class AppContainer extends React.Component {
     var errors = [];
     var count = 0;
 
-    if(this.state.errorDetected) {
+    if(this.state.errorDetected && this.state.errors.length) {
       this.state.errors.forEach((elem, i) => {
         errors.push(<p key={"error"+(++count)}>{elem}</p>);
       });
@@ -34,10 +35,36 @@ class AppContainer extends React.Component {
 
     return (
       <div>
-        {errors}
-        <textarea value={this.state.code} onChange={this.handleChange}
-          onKeyPress={this.handleKeyPress} />
-        <div id="preview" />
+        <div className="messages">
+          {errors}
+        </div>
+
+        <div className="content-block">
+          <h3 className="content-block-header">Editor</h3>
+          <textarea value={this.state.code} onChange={this.handleChange}
+            onKeyPress={this.handleKeyPress} id="editor" />
+        </div>
+
+        <div className="content-block debug-block">
+          <h3 className="content-block-header">AST</h3>
+          <pre id="debug-ast">
+            {JSON.stringify(this.state.parsed, null, '\t')}
+            </pre>
+        </div>
+
+        <div className="content-block">
+          <h3 className="content-block-header">Preview</h3>
+          <div className="mobile">
+            <div id="preview" />
+          </div>
+        </div>
+
+        <div className="content-block debug-block">
+          <h3 className="content-block-header">HTML</h3>
+          <pre id="debug-html">
+            {this.state.html}
+          </pre>
+        </div>
       </div>
     );
   }
@@ -49,6 +76,7 @@ class AppContainer extends React.Component {
   }
 
   handleKeyPress(e) {
+    clearPreview(document.getElementById("preview"));
     try {
       this.setState({
         parsed: esprima.parse(this.state.code,
@@ -65,11 +93,16 @@ class AppContainer extends React.Component {
 
         throw "Semantic Error!";
       }
-
-      console.log(JSON.stringify(this.state.parsed, null, '\t'));
       document
         .getElementById("preview")
         .appendChild(translate(this.state.parsed));
+
+      this.setState({
+        html: document
+        .getElementById('preview')
+        .firstChild.innerHTML
+      });
+
     } catch(err) {
       this.setState({
         errorDetected: true
@@ -80,8 +113,6 @@ class AppContainer extends React.Component {
           errors: ["Error: Line " + err.lineNumber + ": " + err.description]
         })
       }
-
-      clearPreview(document.getElementById("preview"));
     }
   }
 }
