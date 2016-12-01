@@ -123,7 +123,12 @@ SyntaxTree::Node* SymbolTable::declareFunction(std::string id, Type type,
 	if (symb == NULL || !declareOnly) {
 		symbolList[id] = *symbol;
 	} else if (declareOnly) {
-		error("semantic", "re-definition of function %s\n", id.c_str());
+		char buf[200]; 
+		strcpy(buf, "re-definition of function "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "re-definition of function %s\n", id.c_str());
 	}
 
 	return new SyntaxTree::FunctionDeclaration(id, type, params);
@@ -150,7 +155,12 @@ SyntaxTree::Block* SymbolTable::defineFunction(std::string id, Type type,
 	Symbol* symb = find(id, k_func, true);
 
 	if(symb->_initialized) {
-		error("semantic", "re-definition of function %s\n", id.c_str());
+		char buf[200]; 
+		strcpy(buf, "re-definition of function "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "re-definition of function %s\n", id.c_str());
 	}
 
 	symbolList[id]._initialized = true;
@@ -179,7 +189,12 @@ SyntaxTree::Node* SymbolTable::callFunction(std::string id, SyntaxTree::List* pa
 	Symbol* symb = find(id, k_func, false);
 
 	if(symb == NULL) { 
-		error("semantic", "undeclared function %s\n", id.c_str()); 
+		char buf[200]; 
+		strcpy(buf, "undeclared function "); 
+		strcat(buf, id.c_str()); 
+		strcat(buf, "\n");
+		error("semantic", buf);
+		//error("semantic", "undeclared function %s\n", id.c_str()); 
 	} else if(size != symb->_paramsCount) {
 		error("semantic", "function %s expected %d parameters but received %d", 
 			id.c_str(), symb->_paramsCount, size);
@@ -198,7 +213,12 @@ void SymbolTable::checkUndefinedFunction() {
 	for(auto i = symbolList.begin(); i != symbolList.end(); ++i) {
 		if(i->second._kind == k_func && !i->second._initialized) {
 			std::string id = i->first;
-			error("semantic", "function %s is declared but never defined\n", id.c_str());
+			char buf[200]; 
+			strcpy(buf, "function "); 
+			strcat(buf, id.c_str()); 
+			strcat(buf, " is declared but never defined\n");
+			error("semantic", buf);
+			//error("semantic", "function %s is declared but never defined\n", id.c_str());
 		}
 	}
 }

@@ -1,1 +1,1 @@
-[Line 4] semantic error: function myfun is declared but never defined
+[Line 4]: semantic error: function myfun is declared but never defined
