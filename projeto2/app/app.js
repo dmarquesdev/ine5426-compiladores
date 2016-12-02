@@ -47,7 +47,7 @@ class AppContainer extends React.Component {
 
         <div className="content-block debug-block">
           <h3 className="content-block-header">PARSING</h3>
-          {this.parsingStyle()}
+          <div>{this.parsingStyle()}</div>
         </div>
 
         <div className="content-block debug-block">
@@ -74,15 +74,14 @@ class AppContainer extends React.Component {
     );
   }
 
-  parsingStyle(){
-  	var x = "Boolean";
+  parsingStyle(){ 
+  	var codeList = [];
   	for(var i = 0; i < this.state.tokens.length; i++){
+  		var x = "Boolean"; //this.state.tokens[i].type;
   		switch (x){
   			case "Boolean":
   				console.log('aqui2');
-  				<div className="boolean">
-          		texto
-        		</div>
+  				codeList.push(<span className="boolean">texto</span>);
   				break;
   			case "Identifier":
   				break;
@@ -99,13 +98,14 @@ class AppContainer extends React.Component {
   			case "RegularExpression":
   				break;
   			default:
-  				<pre className="variables" id="debug-parsing">
+  				<span className="variables" id="debug-parsing">
   				teste
-  				</pre>
+  				</span>
   				break;
   			
   		}
   	}
+  	return codeList;
   }
 
   handleChange(e) {
