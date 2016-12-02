@@ -46,6 +46,11 @@ class AppContainer extends React.Component {
         </div>
 
         <div className="content-block debug-block">
+          <h3 className="content-block-header">PARSING</h3>
+          {this.parsingStyle()}
+        </div>
+
+        <div className="content-block debug-block">
           <h3 className="content-block-header">AST</h3>
           <pre id="debug-ast">
             {JSON.stringify(this.state.parsed, null, '\t')}
@@ -69,6 +74,40 @@ class AppContainer extends React.Component {
     );
   }
 
+  parsingStyle(){
+  	var x = "Boolean";
+  	for(var i = 0; i < this.state.tokens.length; i++){
+  		switch (x){
+  			case "Boolean":
+  				console.log('aqui2');
+  				<div className="boolean">
+          		texto
+        		</div>
+  				break;
+  			case "Identifier":
+  				break;
+  			case "Keyword":
+  				break;
+  			case "Null":
+  				break;
+  			case "Numeric":
+  				break;
+  			case "Punctuator":
+  				break;
+  			case "String":
+  				break;
+  			case "RegularExpression":
+  				break;
+  			default:
+  				<pre className="variables" id="debug-parsing">
+  				teste
+  				</pre>
+  				break;
+  			
+  		}
+  	}
+  }
+
   handleChange(e) {
     this.setState({
       code: e.target.value
@@ -81,6 +120,7 @@ class AppContainer extends React.Component {
       this.setState({
         parsed: esprima.parse(this.state.code,
           {jsx: true, sourceType: 'module'}),
+        tokens: esprima.tokenize(this.state.code, {range: true}),
         errorDetected: false
       });
 
