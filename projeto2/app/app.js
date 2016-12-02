@@ -4,7 +4,7 @@ import esprima from 'esprima';
 
 import { NativeEditor } from './components';
 
-import { translate, clearPreview, checkSemantic } from './util';
+import { translate, clearPreview, checkSemantic, colorize } from './util';
 
 class AppContainer extends React.Component {
   constructor(props) {
@@ -12,7 +12,7 @@ class AppContainer extends React.Component {
 
   	this.state = {
       parsed: {},
-      tokens: {},
+      tokens: [],
       code: '',
       errorDetected: false,
       errors: [],
@@ -46,15 +46,8 @@ class AppContainer extends React.Component {
         </div>
 
         <div className="content-block debug-block">
-          <h3 className="content-block-header">PARSING</h3>
-          <div>{this.parsingStyle()}</div>
-        </div>
-
-        <div className="content-block debug-block">
-          <h3 className="content-block-header">AST</h3>
-          <pre id="debug-ast">
-            {JSON.stringify(this.state.parsed, null, '\t')}
-            </pre>
+          <h3 className="content-block-header">Tokenization</h3>
+          <div>{colorize(this.state.tokens)}</div>
         </div>
 
         <div className="content-block">
@@ -65,6 +58,20 @@ class AppContainer extends React.Component {
         </div>
 
         <div className="content-block debug-block">
+          <h3 className="content-block-header">AST</h3>
+          <pre id="debug-ast">
+            {JSON.stringify(this.state.parsed, null, '\t')}
+            </pre>
+        </div>
+
+        <div className="content-block debug-block">
+          <h3 className="content-block-header">Tokens</h3>
+          <pre id="debug-tokens">
+            {JSON.stringify(this.state.tokens, null, '\t')}
+          </pre>
+        </div>
+
+        <div className="content-block debug-block">
           <h3 className="content-block-header">HTML</h3>
           <pre id="debug-html">
             {this.state.html}
@@ -72,40 +79,6 @@ class AppContainer extends React.Component {
         </div>
       </div>
     );
-  }
-
-  parsingStyle(){ 
-  	var codeList = [];
-  	for(var i = 0; i < this.state.tokens.length; i++){
-  		var x = "Boolean"; //this.state.tokens[i].type;
-  		switch (x){
-  			case "Boolean":
-  				console.log('aqui2');
-  				codeList.push(<span className="boolean">texto</span>);
-  				break;
-  			case "Identifier":
-  				break;
-  			case "Keyword":
-  				break;
-  			case "Null":
-  				break;
-  			case "Numeric":
-  				break;
-  			case "Punctuator":
-  				break;
-  			case "String":
-  				break;
-  			case "RegularExpression":
-  				break;
-  			default:
-  				<span className="variables" id="debug-parsing">
-  				teste
-  				</span>
-  				break;
-  			
-  		}
-  	}
-  	return codeList;
   }
 
   handleChange(e) {

@@ -5,7 +5,7 @@
 .content-block {
   border: 1px solid black;
   float: left;
-  width: 49vw;
+  width: 33vw;
   height: 49vh;
 }
 
@@ -16,7 +16,7 @@
 }
 
 .mobile {
-  width: 30%;
+  width: 50%;
   border: 1px solid blue;
   margin: 7px auto 0;
   height: 90%;
@@ -47,12 +47,4 @@
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
-}
-
-.variables {
-  color: blue;
-}
-
-.boolean {
-  color: red;
 }

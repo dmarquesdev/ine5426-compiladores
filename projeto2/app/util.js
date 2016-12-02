@@ -169,3 +169,36 @@ export function checkSemantic(parsed) {
 
   return true;
 }
+
+export function colorize(tokens){
+  var codeList = [];
+  for(var i = 0; i < tokens.length; i++){
+    const token = tokens[i];
+    var className = "no-token";
+    switch (token.type){
+      case "Boolean":
+        className="boolean";
+        break;
+      case "Identifier":
+        break;
+      case "Keyword":
+        break;
+      case "Null":
+        break;
+      case "Numeric":
+        break;
+      case "Punctuator":
+        break;
+      case "String":
+        break;
+      case "RegularExpression":
+        break;
+      default:
+        className="no-token";
+        break;
+    }
+
+    codeList.push(<span className={className}>{token.value}</span>);
+  }
+  return codeList;
+}
