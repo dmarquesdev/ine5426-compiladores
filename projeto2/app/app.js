@@ -64,7 +64,7 @@ class AppContainer extends React.Component {
         <div className="content-block debug-block">
           <h5 className="content-block-header">AST</h5>
           <pre id="debug-ast">
-            {JSON.stringify(this.state.parsed, null, '\t')}
+            {JSON.stringify(this.state.parsed, null, 2)}
             </pre>
         </div>
 
