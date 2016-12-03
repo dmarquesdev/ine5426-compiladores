@@ -24,6 +24,9 @@ class Login extends React.Component {
     return (
       <View>
         <Text>Login</Text>
+        <View>
+          <Image style={{width: 50, height: 50, borderWidth: 5}} />
+        </View>
         <TextInput placeholder="Username" />
         <TextInput placeholder="Password" secureTextEntry={true} />
         <Button title="Login" />

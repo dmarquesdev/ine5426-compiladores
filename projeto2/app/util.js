@@ -1,6 +1,48 @@
 import { walk } from 'esprima-walk';
 import React from 'react';
 
+// http://stackoverflow.com/questions/1303646/check-whether-variable-is-number-or-string-in-javascript
+function isNumber(n) { return /^-?[\d.]+(?:e-?\d+)?$/.test(n); }
+
+function translateStyle(attr) {
+  switch(attr) {
+    case "border-width":
+      return "border-top-style: solid; " +
+      "border-bottom-style: solid; " +
+      "border-left-style: solid; " +
+      "border-right-style: solid; " +
+      "border-width"
+    default:
+      return attr;
+  }
+}
+
+function parseStyle(properties) {
+  let styleString = "";
+  for(var i = 0; i < properties.length; i++) {
+    const property = properties[i];
+    var name = "";
+    var value = property.value.value;
+
+    for(var j = 0; j < property.key.name.length; j++) {
+      const char = property.key.name[j];
+      if(char == char.toUpperCase()) {
+        name += "-" + char.toLowerCase();
+      } else {
+        name += char;
+      }
+    }
+
+    if(isNumber(value)) {
+      value = value + "px";
+    }
+
+    styleString += translateStyle(name) + ": " + value + "; ";
+  }
+
+  return styleString;
+}
+
 function map(component, isRoot) {
   const name = component.openingElement.name.name;
   var element = null;
@@ -58,8 +100,21 @@ function map(component, isRoot) {
     case "Image":
       element = document.createElement('img');
       element.setAttribute('class', 'rn-image');
-      element.setAttribute('src', 'assets/images/placeholder.png');
+      element.setAttribute('src', 'images/picture.svg');
       break;
+  }
+
+  // Style parsing
+  if(element != null) {
+    attributes = component.openingElement.attributes;
+    for(var i = 0; i < attributes.length; i++) {
+      const attribute = attributes[i];
+      if(attribute.name.name == 'style') {
+        const properties = attribute.value.expression.properties;
+        element.setAttribute('style', parseStyle(properties));
+        break;
+      }
+    }
   }
 
   return element;
