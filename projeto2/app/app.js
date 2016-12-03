@@ -2,8 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import esprima from 'esprima';
 
-import { NativeEditor } from './components';
-
 import { translate, clearPreview, checkSemantic, colorize } from './util';
 
 class AppContainer extends React.Component {
@@ -40,39 +38,39 @@ class AppContainer extends React.Component {
         </div>
 
         <div className="content-block">
-          <h3 className="content-block-header">Editor</h3>
+          <h5 className="content-block-header">Editor</h5>
           <textarea value={this.state.code} onChange={this.handleChange}
             onKeyPress={this.handleKeyPress} id="editor" />
         </div>
 
         <div className="content-block debug-block">
-          <h3 className="content-block-header">Tokenization</h3>
+          <h5 className="content-block-header">Tokenization</h5>
           <div>{colorize(this.state.tokens)}</div>
         </div>
 
-        <div className="content-block">
-          <h3 className="content-block-header">Preview</h3>
+        <div className="content-block" id="preview-block">
+          <h5 className="content-block-header">Preview</h5>
           <div className="mobile">
             <div id="preview" />
           </div>
         </div>
 
         <div className="content-block debug-block">
-          <h3 className="content-block-header">AST</h3>
+          <h5 className="content-block-header">AST</h5>
           <pre id="debug-ast">
             {JSON.stringify(this.state.parsed, null, '\t')}
             </pre>
         </div>
 
         <div className="content-block debug-block">
-          <h3 className="content-block-header">Tokens</h3>
+          <h5 className="content-block-header">Tokens</h5>
           <pre id="debug-tokens">
             {JSON.stringify(this.state.tokens, null, '\t')}
           </pre>
         </div>
 
         <div className="content-block debug-block">
-          <h3 className="content-block-header">HTML</h3>
+          <h5 className="content-block-header">HTML</h5>
           <pre id="debug-html">
             {this.state.html}
           </pre>
@@ -93,7 +91,8 @@ class AppContainer extends React.Component {
       this.setState({
         parsed: esprima.parse(this.state.code,
           {jsx: true, sourceType: 'module'}),
-        tokens: esprima.tokenize(this.state.code, {range: true}),
+        tokens: esprima.tokenize(this.state.code,
+        {range: true, tolerant: true}),
         errorDetected: false
       });
 

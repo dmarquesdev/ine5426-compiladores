@@ -1,7 +1,7 @@
 import { walk } from 'esprima-walk';
 import React from 'react';
 
-function map(component) {
+function map(component, isRoot) {
   const name = component.openingElement.name.name;
   var element = null;
   var content = "";
@@ -10,7 +10,11 @@ function map(component) {
   switch(name) {
     case "View":
       element = document.createElement('div');
-      element.setAttribute('class', 'rn-view');
+      if(isRoot) {
+        element.setAttribute('class', 'container rn-view');
+      } else {
+        element.setAttribute('class', 'rn-view');
+      }
       break;
 
     case "Text":
@@ -32,19 +36,21 @@ function map(component) {
         }
       }
       element = document.createElement('button');
-      element.setAttribute('class', 'rn-button');
+      element.setAttribute('class', 'rn-button btn grey lighten-1');
       element.innerHTML = content;
       break;
 
     case "TextInput":
       element = document.createElement('input');
-      element.setAttribute('class', 'rn-input');
+      element.setAttribute('class', 'rn-input validate');
       element.setAttribute('type', 'text');
       attributes = component.openingElement.attributes;
       for(var i = 0; i < attributes.length; i++) {
         const attribute = attributes[i];
         if(attribute.name.name == 'secureTextEntry') {
           element.setAttribute('type', 'password');
+        } else if(attribute.name.name == 'placeholder') {
+          element.setAttribute('placeholder', attribute.value.value);
         }
       }
       break;
@@ -59,16 +65,16 @@ function map(component) {
   return element;
 }
 
-function buildHTMLTree(root) {
+function buildHTMLTree(root, isRoot) {
   var html = null;
 
   if(root) {
-    const rootElement = map(root);
+    const rootElement = map(root, isRoot);
 
     for(var i = 0; i < root.children.length; i++) {
       const child = root.children[i];
       if(child.type == 'JSXElement') {
-        rootElement.appendChild(buildHTMLTree(child));
+        rootElement.appendChild(buildHTMLTree(child, false));
       }
     }
 
@@ -91,7 +97,7 @@ export function translate(parsed) {
   });
 
   // Rebuild tree
-  return buildHTMLTree(root);
+  return buildHTMLTree(root, true);
 }
 
 export function clearPreview(element) {
@@ -198,7 +204,7 @@ export function colorize(tokens){
         break;
     }
 
-    codeList.push(<span className={className}>{token.value}</span>);
+    codeList.push(<span id={"token" + i} className={className}>{token.value}</span>);
   }
   return codeList;
 }

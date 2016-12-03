@@ -1,5 +1,7 @@
 .rn-view {
-
+  flex-direction: column;
+  flex: auto;
+  width: 90%;
 }
 
 .rn-text {
@@ -7,7 +9,7 @@
 }
 
 .rn-button {
-  
+  width: 100%;
 }
 
 .rn-image {
@@ -15,5 +17,4 @@
 }
 
 .rn-input {
-
 }

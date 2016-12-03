@@ -17,9 +17,9 @@
 
 .mobile {
   width: 50%;
-  border: 1px solid blue;
   margin: 7px auto 0;
   height: 90%;
+  background-color: #fff;
 }
 
 .debug-block {
@@ -47,4 +47,8 @@
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+}
+
+#preview-block {
+  background-color: #666;
 }
