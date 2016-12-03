@@ -1,7 +1,35 @@
-.variables {
+.boolean {
+  color: #DB7093;
+}
+
+.identifier {
+  color: #FFD700;
+}
+
+.keyword {
   color: blue;
 }
 
-.boolean {
-  color: red;
+.null {
+  color: #DB7093;
+}
+
+.numeric { 
+  color: #DB7093;
+}
+
+.punctuator {
+
+}
+
+.string {
+  color: #FFD700;
+}
+
+.regularExpression {
+  color: green;
+}
+
+.no-token {
+
 }

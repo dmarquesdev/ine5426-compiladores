@@ -186,18 +186,25 @@ export function colorize(tokens){
         className="boolean";
         break;
       case "Identifier":
+        className="identifier";
         break;
       case "Keyword":
+        className="keyword";
         break;
       case "Null":
+        className="null";
         break;
       case "Numeric":
+        className="numeric";
         break;
       case "Punctuator":
+        className="punctuator";
         break;
       case "String":
+        className="string";
         break;
       case "RegularExpression":
+        className="regularExpression";
         break;
       default:
         className="no-token";
