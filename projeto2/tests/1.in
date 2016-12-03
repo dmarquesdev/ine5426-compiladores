@@ -4,14 +4,13 @@ import { View, Text, Button, TextInput, Image } from 'react-native';
 
 class Login extends React.Component {
   render() {
-    return {
+    return (
       <View>
        <Text>Login</Text>
        <TextInput placeholder="Username" />
        <TextInput placeholder="Password" secureTextEntry={true} />
        <Button title="Login" />
       </View>
-
-    };
+    );
   }
 }
