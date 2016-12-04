@@ -22,4 +22,4 @@ fi
 echo "[*] Installing dependencies via NPM..."
 npm install -g webpack electron
 npm install
-echo "[*] All done! use 'npm start' to start the application!"
+echo "[*] All done! restart your terminal and use 'npm start' to start the application!"
