@@ -5,6 +5,9 @@ import esprima from 'esprima';
 import { translate, clearPreview, checkSemantic, colorize } from './util';
 
 class AppContainer extends React.Component {
+
+	
+
   constructor(props) {
   	super(props);
 
@@ -14,12 +17,15 @@ class AppContainer extends React.Component {
       code: '',
       errorDetected: false,
       errors: [],
-      html: ''
+      html: '',
+      jsxcode: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
   }
+
+
 
   render() {
     var errors = [];
@@ -45,7 +51,7 @@ class AppContainer extends React.Component {
 
         <div className="content-block debug-block">
           <h5 className="content-block-header">Tokenization</h5>
-          <div>{colorize(this.state.tokens)}</div>
+          <div>{colorize(this.state.tokens, this.state.jsxcode)}</div>
         </div>
 
         <div className="content-block" id="preview-block">
@@ -87,12 +93,17 @@ class AppContainer extends React.Component {
 
   handleKeyPress(e) {
     clearPreview(document.getElementById("preview"));
+
+    var jsxpattern = /<[a-zA-Z]+>(.*|\s*)*<\/[a-zA-Z]+>/g;
+    var codewithoutjsx = this.state.code.replace(jsxpattern, "'__JSX_CODE__'");
+
     try {
       this.setState({
         parsed: esprima.parse(this.state.code,
           {jsx: true, sourceType: 'module'}),
-        tokens: esprima.tokenize(this.state.code,
-        {range: true, tolerant: true}),
+        tokens: esprima.tokenize(codewithoutjsx,
+        {loc: true, range: true, tolerant: true}),
+        jsxcode: jsxpattern.exec(this.state.code),
         errorDetected: false
       });
 

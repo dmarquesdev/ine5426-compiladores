@@ -282,14 +282,42 @@ export function checkSemantic(parsed) {
   return true;
 }
 
+
 // Receive a list of tokens and break them into 'span'
 // HTML elements with classes that will colorize the text.
 // It's our representation of Lexical Analysis
-export function colorize(tokens){
+export function colorize(tokens, jsxcode){
+
   var codeList = [];
+  var column = 0;
+  var line = 1;
+  var pd = 0;
+
   for(var i = 0; i < tokens.length; i++){
     const token = tokens[i];
     var className = "no-token";
+
+    if(token.loc.start.line > line){
+      for(var y = 0; y < token.loc.start.line-line; y++){
+          codeList.push(<br />);
+        }
+      line = token.loc.end.line;
+      column = 0;
+      pd = 0;
+    }
+
+    if(column === 0){
+      pd = token.loc.start.column*5;
+    }
+
+    if(token.loc.start.column > column){
+        for(var x = 0; x < token.loc.start.column-column; x++){
+          codeList.push(" ");
+        }  
+      }
+
+    column = token.loc.end.column;
+
     switch (token.type){
       case "Boolean":
         className="boolean";
@@ -310,7 +338,12 @@ export function colorize(tokens){
         className="punctuator";
         break;
       case "String":
+        if(token.value == "'__JSX_CODE__'"){
+          token.value = jsxcode;
+          className="jsx";
+        }else{
         className="string";
+        }
         break;
       case "RegularExpression":
         className="regularExpression";
@@ -320,7 +353,9 @@ export function colorize(tokens){
         break;
     }
 
-    codeList.push(<span id={"token" + i} className={className}>{token.value}</span>);
+    codeList.push(<span id={"token" + i} style={{padding: pd + "px"}} className={className}>{token.value}</span>);
+    pd = 0;
+    
   }
   return codeList;
 }

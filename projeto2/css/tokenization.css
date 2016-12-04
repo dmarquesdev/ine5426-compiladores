@@ -3,7 +3,7 @@
 }
 
 .identifier {
-  color: #FFD700;
+  color: red;
 }
 
 .keyword {
@@ -32,4 +32,8 @@
 
 .no-token {
 
+}
+
+.jsx {
+	color: black;
 }
