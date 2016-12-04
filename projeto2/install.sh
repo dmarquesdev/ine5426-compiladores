@@ -1,4 +1,13 @@
 #!/bin/bash
+echo "[*] Installing required libraries (curl, libgconf)"
+DISTRO=$(cat /etc/*elease | grep -e ^ID= | cut -d = -f 2 | tr '[:upper:]' '[:lower:]')
+
+if [[ "$DISTRO" -eq "ubuntu" ]] || [[ "$DISTRO" -eq "debian" ]]; then
+  sudo apt-get install -y libgconf-2-4 curl
+elif [[ "$DISTRO" -eq "arch" ]]; then
+  pacman -Su gconf curl
+fi
+
 echo "[*] Checking Node.js installation..."
 VERSION=$(node -v)
 
