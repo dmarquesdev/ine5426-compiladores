@@ -5,7 +5,7 @@ DISTRO=$(cat /etc/*elease | grep -e ^ID= | cut -d = -f 2 | tr '[:upper:]' '[:low
 if [[ "$DISTRO" -eq "ubuntu" ]] || [[ "$DISTRO" -eq "debian" ]]; then
   sudo apt-get install -y libgconf-2-4 curl
 elif [[ "$DISTRO" -eq "arch" ]]; then
-  pacman -Su gconf curl
+  sudo pacman -Su gconf curl
 fi
 
 echo "[*] Checking Node.js installation..."
