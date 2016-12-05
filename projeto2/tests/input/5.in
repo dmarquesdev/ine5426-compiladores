@@ -1,0 +1,13 @@
+import React from 'react';
+
+import { View, Text, Button, TextInput, Image } from 'react-native';
+
+class Teste extends React.Component {
+  render() {
+    return (
+      <View>
+       <TextInput placeholder="Digite sua senha!" secureTextEntry={true} />
+      </View>
+    );
+  } 
+}
