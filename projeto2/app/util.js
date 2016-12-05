@@ -313,7 +313,7 @@ export function colorize(tokens, jsxcode){
     if(token.loc.start.column > column){
         for(var x = 0; x < token.loc.start.column-column; x++){
           codeList.push(" ");
-        }  
+        }
       }
 
     column = token.loc.end.column;
@@ -353,9 +353,10 @@ export function colorize(tokens, jsxcode){
         break;
     }
 
-    codeList.push(<span id={"token" + i} style={{padding: pd + "px"}} className={className}>{token.value}</span>);
+    codeList.push(<span id={"token" + i} style={{padding: pd + "px"}}
+    className={className}>{token.value}</span>);
     pd = 0;
-    
+
   }
   return codeList;
 }
