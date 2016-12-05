@@ -1,9 +1,9 @@
 #!/bin/bash
 
 echo "[*] Checking for electron-packager..."
-PACK=$(npm list -g electron-packager)
+PACK=$(npm list -g electron-packager | grep empty)
 
-if [[ -z "$PACK" ]]; then
+if [[ "$PACK" ]]; then
   echo "[*] Installing electron-packager via npm"
   npm install electron-packager -g
 fi
