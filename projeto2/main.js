@@ -27,8 +27,7 @@ function createWindow() {
                     mainWindow.webContents.executeJavaScript(`require('electron').ipcRenderer.send('html', document.getElementById('preview').innerHTML);`);
 				ipc.on('html', (_, html) => {
 				saveHTML(html)
-				count++;
-				})
+					})
                 }
             }
         ]
