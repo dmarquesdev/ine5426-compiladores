@@ -23,11 +23,11 @@ function createWindow() {
                 label: 'Salvar HTML',
                 click: () => {
                     console.log('Clicked');
-                    //saveHTML();
                     mainWindow.webContents.executeJavaScript(`require('electron').ipcRenderer.send('html', document.getElementById('preview').innerHTML);`);
 				ipc.on('html', (_, html) => {
 				saveHTML(html)
 					})
+                count++;
                 }
             }
         ]

@@ -1,0 +1,1 @@
+Error: Line 1: Unexpected token var
